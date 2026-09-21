@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <!-- WhatsApp & Social Media Preview Cards (Open Graph Tags) -->
+  <!-- WhatsApp & Social Media Preview Cards -->
   <meta property="og:title" content="🎁 You Have 1 Unopened Birthday Surprise!" />
   <meta property="og:description" content="Tap to blow out your candles, pop balloons, and unlock your secret gift! 🎂✨" />
   <meta property="og:image" content="https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&auto=format&fit=crop&q=80" />
@@ -403,23 +403,30 @@
   <div class="toast" id="toast">Saved! Link copied to clipboard 📋</div>
 
   <script>
-    // Audio Synthesizer Engine
+    // High-Output Audio Synthesizer Engine
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    // Master Volume Boost Node
+    const masterGain = audioCtx.createGain();
+    masterGain.gain.value = 1.0; // Baseline at maximum output
+    masterGain.connect(audioCtx.destination);
 
-    // 1. Full Happy Birthday Song Synthesizer Melody
     let isPlayingMelody = false;
+
+    // 1. Loud & Clear Happy Birthday Melody Synthesizer
     function playHappyBirthdayMelody() {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
       if (isPlayingMelody) return;
       
       isPlayingMelody = true;
-      const tempo = 180; // Beats per minute
+      const tempo = 175;
       const beat = 60 / tempo;
 
-      // Note Frequencies in Hertz (C Major scale)
+      // Pitch frequencies
       const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23, G4 = 392.00, A4 = 440.00, Bb4 = 466.16, C5 = 523.25;
 
-      // Song Notes: [Frequency, Duration in Beats]
       const notes = [
         [C4, 0.75], [C4, 0.25], [D4, 1], [C4, 1], [F4, 1], [E4, 2],
         [C4, 0.75], [C4, 0.25], [D4, 1], [C4, 1], [G4, 1], [F4, 2],
@@ -432,41 +439,49 @@
       notes.forEach(([freq, beats], index) => {
         const duration = beats * beat;
         
+        // Primary Organ/Chime Sound Wave
         const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        
-        osc.type = 'triangle'; // Warm chime sound
-        osc.frequency.setValueAtTime(freq, startTime);
-        
-        // Volume envelope
-        gain.gain.setValueAtTime(0.2, startTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration - 0.03);
+        // Harmonics for a fuller, louder sound
+        const oscSub = audioCtx.createOscillator();
+        const noteGain = audioCtx.createGain();
 
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
+        osc.type = 'triangle'; 
+        oscSub.type = 'sine';
+
+        osc.frequency.setValueAtTime(freq, startTime);
+        oscSub.frequency.setValueAtTime(freq * 2, startTime); // Octave boost
+
+        // Increased peak volume to 0.85 (was 0.2)
+        noteGain.gain.setValueAtTime(0.85, startTime);
+        noteGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration - 0.02);
+
+        osc.connect(noteGain);
+        oscSub.connect(noteGain);
+        noteGain.connect(masterGain);
 
         osc.start(startTime);
+        oscSub.start(startTime);
         osc.stop(startTime + duration);
+        oscSub.stop(startTime + duration);
 
         startTime += duration;
 
-        // Reset state after song finishes
         if (index === notes.length - 1) {
           setTimeout(() => { isPlayingMelody = false; }, (startTime - audioCtx.currentTime) * 1000);
         }
       });
     }
 
-    // 2. Realistic Blowing Wind Sound (Candle Blow)
+    // 2. Loud Blowing Wind Sound (Candle Blow Out)
     function playBlowingSound() {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       
-      const bufferSize = audioCtx.sampleRate * 0.8; // 0.8 seconds duration
+      const bufferSize = audioCtx.sampleRate * 0.8;
       const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
       const data = buffer.getChannelData(0);
 
       for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1; // White noise
+        data[i] = Math.random() * 2 - 1;
       }
 
       const noise = audioCtx.createBufferSource();
@@ -474,21 +489,21 @@
 
       const filter = audioCtx.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(400, audioCtx.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.8);
+      filter.frequency.setValueAtTime(600, audioCtx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.8);
 
       const gain = audioCtx.createGain();
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.9, audioCtx.currentTime); // Boosted from 0.3
       gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
 
       noise.connect(filter);
       filter.connect(gain);
-      gain.connect(audioCtx.destination);
+      gain.connect(masterGain);
 
       noise.start();
     }
 
-    // 3. Balloon Pop Sound
+    // 3. Loud Balloon Pop Sound Effect
     function playPopSound() {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       
@@ -496,17 +511,17 @@
       const gain = audioCtx.createGain();
       
       osc.type = 'square';
-      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.06);
+      osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + 0.08);
 
-      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
+      gain.gain.setValueAtTime(0.85, audioCtx.currentTime); // Boosted from 0.3
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
 
       osc.connect(gain);
-      gain.connect(audioCtx.destination);
+      gain.connect(masterGain);
 
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.06);
+      osc.stop(audioCtx.currentTime + 0.08);
     }
 
     // Load Recipient Name & Wish on Page Load
