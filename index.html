@@ -41,6 +41,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       padding: 20px 15px;
       overflow-x: hidden;
       position: relative;
@@ -63,63 +64,236 @@
       100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
     }
 
-    /* Main Container Card */
+    /* Top Corner Settings Trigger */
+    .settings-btn-top {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .settings-btn-top:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg);
+    }
+
+    /* Main Celebration Container Card */
     .container {
-      max-width: 550px;
+      max-width: 520px;
       width: 100%;
       background: var(--card-bg);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.18);
       border-radius: 28px;
-      padding: 30px 20px;
+      padding: 35px 25px;
       text-align: center;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
       position: relative;
       z-index: 10;
-      margin-bottom: 25px;
     }
 
-    /* Creator Toggle Button */
-    .creator-toggle {
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px dashed rgba(255, 255, 255, 0.4);
-      padding: 10px 18px;
-      border-radius: 50px;
-      color: #fff;
-      font-size: 0.9rem;
+    /* Title & Banner Text */
+    .title-banner {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.8rem;
+      line-height: 1.2;
+      background: linear-gradient(45deg, #ffee00, #ff3366, #7000ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+      animation: pulseTitle 2s infinite alternate;
+    }
+
+    @keyframes pulseTitle {
+      0% { filter: drop-shadow(0 0 10px rgba(255, 238, 0, 0.4)); }
+      100% { filter: drop-shadow(0 0 20px rgba(255, 51, 102, 0.8)); }
+    }
+
+    .recipient-name {
+      color: var(--accent);
+      text-transform: capitalize;
+    }
+
+    .wish-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+      margin: 15px 0 25px 0;
+      font-weight: 400;
+    }
+
+    /* Interactive Birthday Cake */
+    .cake-container {
+      position: relative;
+      margin: 25px auto 20px auto;
+      width: 180px;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 20px;
-      transition: all 0.3s ease;
+      user-select: none;
     }
 
-    .creator-toggle:hover {
-      background: rgba(255, 255, 255, 0.25);
-      transform: translateY(-2px);
+    .cake-emoji {
+      font-size: 6.5rem;
+      display: inline-block;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    /* Creator Panel Drawer */
-    .creator-panel {
-      display: none;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+    .cake-container:hover .cake-emoji {
+      transform: scale(1.1) rotate(3deg);
+    }
+
+    .candle-hint {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      background: rgba(255,255,255,0.1);
+      padding: 6px 14px;
       border-radius: 20px;
+      display: inline-block;
+      margin-top: 5px;
+    }
+
+    /* Action Control Bar */
+    .action-bar {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 25px;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.1);
+    }
+
+    /* Gift Box Reveal */
+    .gift-section {
+      margin-top: 25px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 20px;
+    }
+
+    .gift-box {
+      font-size: 4rem;
+      cursor: pointer;
+      display: inline-block;
+      animation: giftBounce 2s infinite;
+      transition: transform 0.2s;
+    }
+
+    @keyframes giftBounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0) rotate(0deg); }
+      40% { transform: translateY(-18px) rotate(-5deg); }
+      60% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    .gift-message {
+      display: none;
+      background: linear-gradient(135deg, rgba(255,238,0,0.15), rgba(255,51,102,0.15));
+      border: 1px dashed var(--accent);
+      border-radius: 16px;
+      padding: 18px;
+      margin-top: 15px;
+      color: #fff;
+      font-weight: 600;
+      animation: fadeIn 0.5s ease;
+    }
+
+    /* Unified Settings Modal Overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
       padding: 20px;
-      margin-bottom: 25px;
-      text-align: left;
-      animation: fadeIn 0.4s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .settings-card {
+      background: #1e1b4b;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      padding: 25px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: fadeIn 0.3s ease;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-10px); }
+      from { opacity: 0; transform: translateY(-15px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 12px;
+    }
+
+    .modal-header h3 {
+      font-size: 1.2rem;
+      color: var(--accent);
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      color: #fff;
     }
 
     .form-group {
       margin-bottom: 15px;
+      text-align: left;
     }
 
     .form-group label {
@@ -181,126 +355,6 @@
       margin-top: 10px;
     }
 
-    /* Title & Banner Text */
-    .title-banner {
-      font-family: 'Fredoka One', cursive;
-      font-size: 2.8rem;
-      line-height: 1.2;
-      background: linear-gradient(45deg, #ffee00, #ff3366, #7000ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 10px;
-      animation: pulseTitle 2s infinite alternate;
-    }
-
-    @keyframes pulseTitle {
-      0% { filter: drop-shadow(0 0 10px rgba(255, 238, 0, 0.4)); }
-      100% { filter: drop-shadow(0 0 20px rgba(255, 51, 102, 0.8)); }
-    }
-
-    .recipient-name {
-      color: var(--accent);
-      text-transform: capitalize;
-    }
-
-    .wish-text {
-      font-size: 1.05rem;
-      line-height: 1.6;
-      color: #e2e8f0;
-      margin: 15px 0 25px 0;
-      font-weight: 400;
-    }
-
-    /* Interactive Birthday Cake */
-    .cake-container {
-      position: relative;
-      margin: 30px auto 20px auto;
-      width: 180px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .cake-emoji {
-      font-size: 6rem;
-      display: inline-block;
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .cake-container:hover .cake-emoji {
-      transform: scale(1.1) rotate(3deg);
-    }
-
-    .candle-hint {
-      font-size: 0.85rem;
-      color: #cbd5e1;
-      background: rgba(255,255,255,0.1);
-      padding: 6px 14px;
-      border-radius: 20px;
-      display: inline-block;
-      margin-top: 5px;
-    }
-
-    /* Gift Box Reveal */
-    .gift-section {
-      margin-top: 30px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding-top: 25px;
-    }
-
-    .gift-box {
-      font-size: 4rem;
-      cursor: pointer;
-      display: inline-block;
-      animation: giftBounce 2s infinite;
-      transition: transform 0.2s;
-    }
-
-    @keyframes giftBounce {
-      0%, 20%, 50%, 80%, 100% { transform: translateY(0) rotate(0deg); }
-      40% { transform: translateY(-18px) rotate(-5deg); }
-      60% { transform: translateY(-10px) rotate(5deg); }
-    }
-
-    .gift-message {
-      display: none;
-      background: linear-gradient(135deg, rgba(255,238,0,0.15), rgba(255,51,102,0.15));
-      border: 1px dashed var(--accent);
-      border-radius: 16px;
-      padding: 18px;
-      margin-top: 15px;
-      color: #fff;
-      font-weight: 600;
-      animation: fadeIn 0.5s ease;
-    }
-
-    /* Action Control Bar */
-    .action-bar {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 20px;
-    }
-
-    .icon-btn {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .icon-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
-      transform: scale(1.1);
-    }
-
     /* Toast Notification */
     .toast {
       position: fixed;
@@ -314,7 +368,7 @@
       font-weight: 600;
       box-shadow: 0 10px 25px rgba(0,0,0,0.3);
       transition: transform 0.3s ease;
-      z-index: 100;
+      z-index: 150;
     }
 
     .toast.show {
@@ -324,31 +378,69 @@
 </head>
 <body>
 
-  <!-- Floating background balloons -->
+  <!-- Floating Background Balloons -->
   <div id="balloon-container"></div>
 
   <!-- HTML5 Audio Element for Custom Audio Files -->
-  <audio id="customAudioPlayer" preload="auto"></audio>
+  <audio id="customAudioPlayer" preload="auto" loop></audio>
 
+  <!-- Gear Button: Triggers All Settings Menu -->
+  <button class="settings-btn-top" onclick="openSettingsModal()" title="Celebration Settings">
+    <i class="fa-solid fa-gear"></i>
+  </button>
+
+  <!-- Celebration Display Card -->
   <div class="container">
     
-    <!-- Creator Drawer Toggle Button -->
-    <button class="creator-toggle" onclick="toggleCreator()">
-      <i class="fa-solid fa-gear"></i>
-      <span>Settings: Name, Wish & Music</span>
-    </button>
+    <h1 class="title-banner">
+      Happy Birthday, <br><span class="recipient-name" id="displayName">Birthday Star</span>! 🎉
+    </h1>
 
-    <!-- Creator Input Panel -->
-    <div class="creator-panel" id="creatorPanel">
-      <h3 style="margin-bottom: 12px; color: var(--accent); font-size: 1.1rem;">
-        <i class="fa-solid fa-pen-to-square"></i> Webpage Settings
-      </h3>
-      
+    <p class="wish-text" id="displayWish">
+      Wishing you a magical year ahead filled with happiness, adventure, joy, and all your heart desires!
+    </p>
+
+    <!-- Interactive Birthday Cake -->
+    <div class="cake-container" onclick="blowOutCandles()">
+      <div class="cake-emoji" id="cakeEmoji">🎂</div>
+      <br>
+      <span class="candle-hint" id="cakeHint"><i class="fa-solid fa-wind"></i> Tap cake to blow candles!</span>
+    </div>
+
+    <!-- Celebration Controls -->
+    <div class="action-bar">
+      <button class="icon-btn" onclick="toggleMusicPlayback()" title="Play / Pause Music">🎶</button>
+      <button class="icon-btn" onclick="triggerConfetti()" title="Pop Confetti">🎉</button>
+      <button class="icon-btn" onclick="openSettingsModal()" title="Settings Menu">⚙️</button>
+    </div>
+
+    <!-- Interactive Gift Box -->
+    <div class="gift-section">
+      <p style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">You have an unopened gift box!</p>
+      <div class="gift-box" id="giftBox" onclick="openGift()">🎁</div>
+      <div class="gift-message" id="giftMessage">
+        🎁 <strong>SPECIAL SURPRISE!</strong><br>
+        "May every moment of your special day be as wonderful and extraordinary as you are!" ✨🥂
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Unified Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="settings-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-sliders"></i> Celebration Settings</h3>
+        <button class="close-btn" onclick="closeSettingsModal()">&times;</button>
+      </div>
+
+      <!-- 1. Name Setting -->
       <div class="form-group">
         <label>Birthday Person's Name:</label>
         <input type="text" id="inputName" placeholder="e.g. Alex, Sarah, Rahul" value="">
       </div>
 
+      <!-- 2. Wish Message Setting -->
       <div class="form-group">
         <label>Birthday Wish Message:</label>
         <select id="wishPreset" onchange="applyPresetWish(this.value)" style="margin-bottom: 8px;">
@@ -361,7 +453,7 @@
         <textarea id="inputWish" rows="3" placeholder="Type custom message..."></textarea>
       </div>
 
-      <!-- Music Settings Section -->
+      <!-- 3. Music Settings -->
       <div class="form-group" style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 12px;">
         <label><i class="fa-solid fa-music" style="color: var(--accent);"></i> Choose Birthday Music Track:</label>
         <select id="musicSelect" onchange="handleMusicOptionChange(this.value)">
@@ -381,72 +473,48 @@
 
       <!-- Input for File Upload -->
       <div class="form-group" id="fileUploadGroup" style="display: none;">
-        <label>Upload Audio File from your Phone/PC:</label>
+        <label>Upload Audio File from Device:</label>
         <input type="file" id="inputFileUpload" accept="audio/*" onchange="handleFileSelected(event)">
       </div>
 
-      <button class="btn-action" onclick="saveAndUpdateDetails()">
-        <i class="fa-solid fa-floppy-disk"></i> Save Settings & Copy Link
+      <!-- Action Buttons -->
+      <button class="btn-action" onclick="saveSettingsAndApply()">
+        <i class="fa-solid fa-floppy-disk"></i> Save & Copy Shareable Link
       </button>
 
       <button class="btn-action btn-whatsapp" onclick="shareToWhatsApp()">
         <i class="fa-brands fa-whatsapp"></i> Send Direct via WhatsApp
       </button>
     </div>
-
-    <!-- Main Card Display -->
-    <h1 class="title-banner">
-      Happy Birthday, <br><span class="recipient-name" id="displayName">Birthday Star</span>! 🎉
-    </h1>
-
-    <p class="wish-text" id="displayWish">
-      Wishing you a magical year ahead filled with happiness, adventure, joy, and all your heart desires!
-    </p>
-
-    <!-- Interactive Birthday Cake -->
-    <div class="cake-container" onclick="blowOutCandles()">
-      <div class="cake-emoji" id="cakeEmoji">🎂</div>
-      <br>
-      <span class="candle-hint" id="cakeHint"><i class="fa-solid fa-wind"></i> Tap cake to blow candles & play music!</span>
-    </div>
-
-    <!-- Controls -->
-    <div class="action-bar">
-      <button class="icon-btn" onclick="triggerConfetti(); playBirthdayMusic();" title="Play Birthday Song">🎶</button>
-      <button class="icon-btn" onclick="triggerConfetti()" title="Pop Confetti">🎉</button>
-      <button class="icon-btn" onclick="toggleCreator()" title="Open Page Settings">⚙️</button>
-    </div>
-
-    <!-- Interactive Gift Box -->
-    <div class="gift-section">
-      <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px;">You have an unread gift box!</p>
-      <div class="gift-box" id="giftBox" onclick="openGift()">🎁</div>
-      <div class="gift-message" id="giftMessage">
-        🎁 <strong>SPECIAL SURPRISE!</strong><br>
-        "May every moment of your special day be as wonderful and extraordinary as you are!" ✨🥂
-      </div>
-    </div>
-
   </div>
 
   <div class="toast" id="toast">Saved! Link copied to clipboard 📋</div>
 
   <script>
-    // Audio Player & Synthesizer State
+    // Audio Player & Synthesizer Setup
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const masterGain = audioCtx.createGain();
     masterGain.gain.value = 1.0;
     masterGain.connect(audioCtx.destination);
 
     const customAudioPlayer = document.getElementById('customAudioPlayer');
-    let currentMusicSource = 'synth'; // Options: synth, url, file
+    let currentMusicSource = 'synth';
     let customAudioUrl = '';
+    let isPlaying = false;
 
-    // Sample Free Royalty MP3 Presets
+    // Free Royalty MP3 Presets
     const PRESET_MUSIC = {
       preset1: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a8e32c.mp3',
       preset2: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_8b49e6f1f4.mp3'
     };
+
+    function openSettingsModal() {
+      document.getElementById('settingsModal').classList.add('active');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('active');
+    }
 
     function handleMusicOptionChange(val) {
       const urlGroup = document.getElementById('customUrlGroup');
@@ -480,7 +548,16 @@
       }
     }
 
-    // Play Selected Music (Custom Audio or Synth Fallback)
+    function toggleMusicPlayback() {
+      if (isPlaying) {
+        customAudioPlayer.pause();
+        isPlaying = false;
+      } else {
+        playBirthdayMusic();
+      }
+    }
+
+    // Play Birthday Music Routine
     function playBirthdayMusic() {
       const customUrlInput = document.getElementById('inputMusicUrl').value.trim();
       
@@ -491,10 +568,16 @@
       if ((currentMusicSource === 'url' || currentMusicSource === 'file') && customAudioUrl) {
         customAudioPlayer.src = customAudioUrl;
         customAudioPlayer.volume = 1.0;
-        customAudioPlayer.play().catch(() => {
-          // Fallback to synth if audio fails to load or play
-          playHappyBirthdayMelody();
-        });
+        let playPromise = customAudioPlayer.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            isPlaying = true;
+          }).catch(error => {
+            // Browser autoplay blocked: fallback to synth or wait for user click
+            playHappyBirthdayMelody();
+          });
+        }
       } else {
         playHappyBirthdayMelody();
       }
@@ -507,6 +590,7 @@
       if (isPlayingMelody) return;
       
       isPlayingMelody = true;
+      isPlaying = true;
       const tempo = 175;
       const beat = 60 / tempo;
       const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23, G4 = 392.00, A4 = 440.00, Bb4 = 466.16, C5 = 523.25;
@@ -552,7 +636,7 @@
       });
     }
 
-    // Candle Blow Sound Effect
+    // Candle Blowing Sound Effect
     function playBlowingSound() {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const bufferSize = audioCtx.sampleRate * 0.8;
@@ -582,7 +666,7 @@
       noise.start();
     }
 
-    // Balloon Pop Sound
+    // Balloon Pop Sound Effect
     function playPopSound() {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
@@ -602,7 +686,7 @@
       osc.stop(audioCtx.currentTime + 0.08);
     }
 
-    // Page Load Setup
+    // Automatic Playback Initializer
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       let nameParam = urlParams.get('name');
@@ -640,13 +724,19 @@
       }
 
       createFloatingBalloons();
-      setTimeout(triggerConfetti, 800);
-    });
+      setTimeout(triggerConfetti, 600);
 
-    function toggleCreator() {
-      const panel = document.getElementById('creatorPanel');
-      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-    }
+      // Attempt Automatic Music Playback on Page Load
+      playBirthdayMusic();
+
+      // Autoplay Fallback for Browser Media Block Policies:
+      document.addEventListener('click', function startAudioOnFirstInteraction() {
+        if (!isPlaying) {
+          playBirthdayMusic();
+        }
+        document.removeEventListener('click', startAudioOnFirstInteraction);
+      }, { once: true });
+    });
 
     function applyPresetWish(val) {
       if (val !== 'custom') {
@@ -654,7 +744,7 @@
       }
     }
 
-    function saveAndUpdateDetails() {
+    function saveSettingsAndApply() {
       const name = document.getElementById('inputName').value.trim() || 'Birthday Star';
       const wish = document.getElementById('inputWish').value.trim();
       const musicSelectVal = document.getElementById('musicSelect').value;
@@ -678,14 +768,17 @@
       window.history.pushState({ path: newUrl }, '', newUrl);
 
       navigator.clipboard.writeText(window.location.href).then(() => {
-        showToast('Saved & copied link with your music! 📋');
+        showToast('Saved & shareable link copied! 📋');
       }).catch(() => {
-        showToast('Saved to memory! 🎉');
+        showToast('Settings saved! 🎉');
       });
+
+      closeSettingsModal();
+      playBirthdayMusic();
     }
 
     function shareToWhatsApp() {
-      saveAndUpdateDetails();
+      saveSettingsAndApply();
       const name = document.getElementById('inputName').value.trim() || 'Friend';
       const link = window.location.href;
       
