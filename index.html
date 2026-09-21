@@ -226,7 +226,7 @@
       animation: fadeIn 0.5s ease;
     }
 
-    /* Unified Settings Modal Overlay */
+    /* Settings Modal */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -381,10 +381,10 @@
   <!-- Floating Background Balloons -->
   <div id="balloon-container"></div>
 
-  <!-- HTML5 Audio Element for Custom Audio Files -->
+  <!-- HTML5 Audio Element for Audio Playback -->
   <audio id="customAudioPlayer" preload="auto" loop></audio>
 
-  <!-- Gear Button: Triggers All Settings Menu -->
+  <!-- Gear Button: Triggers Settings Menu -->
   <button class="settings-btn-top" onclick="openSettingsModal()" title="Celebration Settings">
     <i class="fa-solid fa-gear"></i>
   </button>
@@ -458,11 +458,17 @@
         <label><i class="fa-solid fa-music" style="color: var(--accent);"></i> Choose Birthday Music Track:</label>
         <select id="musicSelect" onchange="handleMusicOptionChange(this.value)">
           <option value="synth">🎹 Built-in Synth Chime Tune (Default)</option>
-          <option value="preset1">🎺 Orchestral Birthday Celebration (MP3)</option>
-          <option value="preset2">🎸 Upbeat Acoustic Birthday Track (MP3)</option>
+          <option value="fileUpload">📁 Upload & Save Song from Device</option>
+          <option value="preset1">🎺 Orchestral Birthday Celebration (MP3 Link)</option>
+          <option value="preset2">🎸 Upbeat Acoustic Birthday Track (MP3 Link)</option>
           <option value="customUrl">🔗 Paste Custom MP3 Link (URL)</option>
-          <option value="fileUpload">📁 Upload MP3 File from Device</option>
         </select>
+      </div>
+
+      <!-- Input for Local File Upload -->
+      <div class="form-group" id="fileUploadGroup" style="display: none;">
+        <label>Select Song from your Device (Saved in Browser):</label>
+        <input type="file" id="inputFileUpload" accept="audio/*" onchange="handleFileSelected(event)">
       </div>
 
       <!-- Input for Custom MP3 Link -->
@@ -471,15 +477,9 @@
         <input type="url" id="inputMusicUrl" placeholder="https://example.com/my-song.mp3">
       </div>
 
-      <!-- Input for File Upload -->
-      <div class="form-group" id="fileUploadGroup" style="display: none;">
-        <label>Upload Audio File from Device:</label>
-        <input type="file" id="inputFileUpload" accept="audio/*" onchange="handleFileSelected(event)">
-      </div>
-
       <!-- Action Buttons -->
       <button class="btn-action" onclick="saveSettingsAndApply()">
-        <i class="fa-solid fa-floppy-disk"></i> Save & Copy Shareable Link
+        <i class="fa-solid fa-floppy-disk"></i> Save Settings
       </button>
 
       <button class="btn-action btn-whatsapp" onclick="shareToWhatsApp()">
@@ -488,10 +488,47 @@
     </div>
   </div>
 
-  <div class="toast" id="toast">Saved! Link copied to clipboard 📋</div>
+  <div class="toast" id="toast">Saved! 🎉</div>
 
   <script>
-    // Audio Player & Synthesizer Setup
+    // --- IndexedDB Browser Storage for Local Song Persistence ---
+    function openAudioDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open('BirthdayAudioDB', 1);
+        request.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('audio')) {
+            db.createObjectStore('audio');
+          }
+        };
+        request.onsuccess = (e) => resolve(e.target.result);
+        request.onerror = (e) => reject(e.target.error);
+      });
+    }
+
+    async function saveAudioToIDB(file) {
+      const db = await openAudioDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('audio', 'readwrite');
+        const store = tx.objectStore('audio');
+        store.put(file, 'userSong');
+        tx.oncomplete = () => resolve();
+        tx.onerror = (e) => reject(e.target.error);
+      });
+    }
+
+    async function getAudioFromIDB() {
+      const db = await openAudioDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('audio', 'readonly');
+        const store = tx.objectStore('audio');
+        const request = store.get('userSong');
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = (e) => reject(e.target.error);
+      });
+    }
+
+    // --- Audio Player & Synthesizer Setup ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const masterGain = audioCtx.createGain();
     masterGain.gain.value = 1.0;
@@ -502,7 +539,6 @@
     let customAudioUrl = '';
     let isPlaying = false;
 
-    // Free Royalty MP3 Presets
     const PRESET_MUSIC = {
       preset1: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a8e32c.mp3',
       preset2: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_8b49e6f1f4.mp3'
@@ -523,12 +559,12 @@
       urlGroup.style.display = 'none';
       fileGroup.style.display = 'none';
 
-      if (val === 'customUrl') {
+      if (val === 'fileUpload') {
+        fileGroup.style.display = 'block';
+        currentMusicSource = 'localFile';
+      } else if (val === 'customUrl') {
         urlGroup.style.display = 'block';
         currentMusicSource = 'url';
-      } else if (val === 'fileUpload') {
-        fileGroup.style.display = 'block';
-        currentMusicSource = 'file';
       } else if (PRESET_MUSIC[val]) {
         currentMusicSource = 'url';
         customAudioUrl = PRESET_MUSIC[val];
@@ -538,13 +574,14 @@
       }
     }
 
-    function handleFileSelected(event) {
+    async function handleFileSelected(event) {
       const file = event.target.files[0];
       if (file) {
+        await saveAudioToIDB(file);
         customAudioUrl = URL.createObjectURL(file);
         customAudioPlayer.src = customAudioUrl;
-        currentMusicSource = 'file';
-        showToast('Local music loaded! 🎵');
+        currentMusicSource = 'localFile';
+        showToast('Song saved in browser memory! 🎵');
       }
     }
 
@@ -558,14 +595,32 @@
     }
 
     // Play Birthday Music Routine
-    function playBirthdayMusic() {
+    async function playBirthdayMusic() {
+      if (currentMusicSource === 'localFile') {
+        if (!customAudioUrl) {
+          const storedBlob = await getAudioFromIDB();
+          if (storedBlob) {
+            customAudioUrl = URL.createObjectURL(storedBlob);
+          }
+        }
+        if (customAudioUrl) {
+          customAudioPlayer.src = customAudioUrl;
+          customAudioPlayer.volume = 1.0;
+          customAudioPlayer.play().then(() => {
+            isPlaying = true;
+          }).catch(() => {
+            playHappyBirthdayMelody();
+          });
+          return;
+        }
+      }
+
       const customUrlInput = document.getElementById('inputMusicUrl').value.trim();
-      
       if (currentMusicSource === 'url' && customUrlInput) {
         customAudioUrl = customUrlInput;
       }
 
-      if ((currentMusicSource === 'url' || currentMusicSource === 'file') && customAudioUrl) {
+      if (currentMusicSource === 'url' && customAudioUrl) {
         customAudioPlayer.src = customAudioUrl;
         customAudioPlayer.volume = 1.0;
         let playPromise = customAudioPlayer.play();
@@ -573,8 +628,7 @@
         if (playPromise !== undefined) {
           playPromise.then(() => {
             isPlaying = true;
-          }).catch(error => {
-            // Browser autoplay blocked: fallback to synth or wait for user click
+          }).catch(() => {
             playHappyBirthdayMelody();
           });
         }
@@ -686,16 +740,12 @@
       osc.stop(audioCtx.currentTime + 0.08);
     }
 
-    // Automatic Playback Initializer
-    window.addEventListener('DOMContentLoaded', () => {
+    // Page Load Setup
+    window.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
-      let nameParam = urlParams.get('name');
-      let wishParam = urlParams.get('wish');
-      let musicParam = urlParams.get('music');
-
-      if (!nameParam) nameParam = localStorage.getItem('saved_birthday_name');
-      if (!wishParam) wishParam = localStorage.getItem('saved_birthday_wish');
-      if (!musicParam) musicParam = localStorage.getItem('saved_birthday_music');
+      let nameParam = urlParams.get('name') || localStorage.getItem('saved_birthday_name');
+      let wishParam = urlParams.get('wish') || localStorage.getItem('saved_birthday_wish');
+      let musicParam = urlParams.get('music') || localStorage.getItem('saved_birthday_music');
 
       if (nameParam) {
         document.getElementById('displayName').innerText = nameParam;
@@ -710,7 +760,11 @@
       }
 
       if (musicParam) {
-        if (musicParam.startsWith('http')) {
+        if (musicParam === 'localFile') {
+          currentMusicSource = 'localFile';
+          document.getElementById('musicSelect').value = 'fileUpload';
+          document.getElementById('fileUploadGroup').style.display = 'block';
+        } else if (musicParam.startsWith('http')) {
           currentMusicSource = 'url';
           customAudioUrl = musicParam;
           document.getElementById('musicSelect').value = 'customUrl';
@@ -726,10 +780,10 @@
       createFloatingBalloons();
       setTimeout(triggerConfetti, 600);
 
-      // Attempt Automatic Music Playback on Page Load
-      playBirthdayMusic();
+      // Attempt Automatic Music Playback
+      await playBirthdayMusic();
 
-      // Autoplay Fallback for Browser Media Block Policies:
+      // Autoplay Fallback for Browser Media Restrictions
       document.addEventListener('click', function startAudioOnFirstInteraction() {
         if (!isPlaying) {
           playBirthdayMusic();
@@ -751,7 +805,9 @@
       const customUrlVal = document.getElementById('inputMusicUrl').value.trim();
 
       let musicToSave = musicSelectVal;
-      if (musicSelectVal === 'customUrl' && customUrlVal) {
+      if (musicSelectVal === 'fileUpload') {
+        musicToSave = 'localFile';
+      } else if (musicSelectVal === 'customUrl' && customUrlVal) {
         musicToSave = customUrlVal;
       } else if (PRESET_MUSIC[musicSelectVal]) {
         musicToSave = PRESET_MUSIC[musicSelectVal];
@@ -767,12 +823,7 @@
       const newUrl = `${window.location.pathname}?name=${encodeURIComponent(name)}&wish=${encodeURIComponent(wish)}&music=${encodeURIComponent(musicToSave)}`;
       window.history.pushState({ path: newUrl }, '', newUrl);
 
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        showToast('Saved & shareable link copied! 📋');
-      }).catch(() => {
-        showToast('Settings saved! 🎉');
-      });
-
+      showToast('Settings Saved! 🎉');
       closeSettingsModal();
       playBirthdayMusic();
     }
