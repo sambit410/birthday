@@ -449,7 +449,7 @@
 
   <div class="bg-glow"></div>
 
-  <!-- Hidden HTML5 Audio Element for Google Drive direct file links -->
+  <!-- Hidden HTML5 Audio Element -->
   <audio id="bgAudio" preload="auto" loop></audio>
 
   <!-- Settings Gear Button -->
@@ -530,8 +530,8 @@
       <label for="inputLetter">Secret Letter Message</label>
       <textarea id="inputLetter" rows="4" placeholder="Write your heartfelt letter..."></textarea>
 
-      <label for="inputAudioUrl">Google Drive Direct Audio Link (mp3)</label>
-      <input type="url" id="inputAudioUrl" placeholder="https://docs.google.com/uc?export=download&id=YOUR_FILE_ID">
+      <label for="inputAudioUrl">Google Drive Share Link</label>
+      <input type="url" id="inputAudioUrl" placeholder="https://drive.google.com/file/d/.../view?usp=drivesdk">
 
       <button class="action-btn" onclick="copyCustomLink()" style="margin-bottom: 10px;">
         <i class="fa-solid fa-link"></i> Copy Shareable Link
@@ -544,13 +544,12 @@
   </div>
 
   <script>
-    let defaultAudioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // Fallback sample track
+    let defaultAudioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; 
     let currentAudioUrl = defaultAudioUrl;
 
-    // Convert standard Google Drive share links to a direct streaming/download stream link automatically
+    // Converts normal Google Drive sharing URLs directly to a streaming audio source
     function convertGoogleDriveLink(url) {
       if (!url) return '';
-      // If it contains file/d/ID/view or id=ID
       let fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
       if (fileIdMatch && fileIdMatch[1]) {
         return `https://docs.google.com/uc?export=download&id=${fileIdMatch[1]}`;
@@ -560,7 +559,6 @@
 
     const audioElement = document.getElementById('bgAudio');
 
-    // Audio Player State Handlers
     audioElement.addEventListener('playing', () => {
       document.getElementById('playPauseIcon').className = 'fa-solid fa-pause';
       document.getElementById('albumArtIcon').classList.add('playing');
@@ -584,7 +582,6 @@
       }
     }
 
-    // Load custom parameters from URL on load
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const name = params.get('name');
@@ -613,7 +610,6 @@
       audioElement.src = currentAudioUrl;
     });
 
-    // Envelope Open & Play Audio/Confetti
     function openEnvelope() {
       document.getElementById('envelopeScreen').classList.add('hidden');
       document.getElementById('mainContainer').style.display = 'block';
@@ -628,7 +624,6 @@
       });
     }
 
-    // Section Navigation
     function nextSection(secNum) {
       document.querySelectorAll('.section-card').forEach(card => card.classList.remove('active'));
       document.getElementById('sec' + secNum).classList.add('active');
@@ -644,7 +639,6 @@
       audioElement.currentTime = 0;
     }
 
-    // Modal Controls
     function openModal() {
       document.getElementById('settingsModal').style.display = 'flex';
     }
@@ -659,7 +653,6 @@
       }
     };
 
-    // Generate Shareable Link
     function getShareUrl() {
       const name = document.getElementById('inputName').value.trim();
       const intro = document.getElementById('inputIntro').value.trim();
