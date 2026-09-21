@@ -43,6 +43,37 @@
       pointer-events: none;
     }
 
+    /* Falling Birthday Rain Elements Container */
+    #rain-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+      overflow: hidden;
+    }
+
+    .falling-item {
+      position: absolute;
+      top: -50px;
+      font-size: 1.8rem;
+      user-select: none;
+      animation: fall linear forwards;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(105vh) rotate(360deg);
+        opacity: 0.2;
+      }
+    }
+
     /* Minimal Settings Button */
     .settings-gear-btn {
       position: absolute;
@@ -275,6 +306,7 @@
 <body>
 
   <div class="bg-glow"></div>
+  <div id="rain-container"></div>
 
   <!-- Offscreen YouTube Player Container -->
   <div id="yt-hidden-container">
@@ -338,6 +370,38 @@
     let ytPlayer = null;
     let isYTReady = false;
     let targetVideoId = '';
+    let rainInterval = null;
+
+    // Birthday rain elements
+    const birthdayItems = ['🎈', '🎂', '🎁', '🎉', '✨', '🥳', '🧁', '⭐'];
+
+    function startBirthdayRain() {
+      if (rainInterval) return; // Prevent multiple rain timers
+
+      const rainContainer = document.getElementById('rain-container');
+      
+      rainInterval = setInterval(() => {
+        const item = document.createElement('div');
+        item.classList.add('falling-item');
+        item.innerText = birthdayItems[Math.floor(Math.random() * birthdayItems.length)];
+        
+        // Random horizontal position, duration, and size
+        const startLeft = Math.random() * 100;
+        const duration = 3 + Math.random() * 3; // 3s to 6s
+        const fontSize = 1.2 + Math.random() * 1.2; // 1.2rem to 2.4rem
+
+        item.style.left = startLeft + 'vw';
+        item.style.animationDuration = duration + 's';
+        item.style.fontSize = fontSize + 'rem';
+
+        rainContainer.appendChild(item);
+
+        // Remove element after animation finishes
+        setTimeout(() => {
+          item.remove();
+        }, duration * 1000);
+      }, 300);
+    }
 
     // Extract 11-character video ID from YouTube links
     function parseYouTubeId(url) {
@@ -399,7 +463,10 @@
         confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
       }
 
-      // 2. Play YouTube Audio
+      // 2. Start Birthday Rain Effect
+      startBirthdayRain();
+
+      // 3. Play YouTube Audio
       if (targetVideoId && isYTReady && ytPlayer) {
         if (typeof ytPlayer.playVideo === 'function') {
           ytPlayer.loadVideoById(targetVideoId);
