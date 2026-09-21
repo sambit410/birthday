@@ -3,159 +3,552 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Birthday Celebration 🎉</title>
+  <title>Happy Birthday Surprise! 🎉</title>
+  
+  <!-- Open Graph Meta Tags for WhatsApp & Social Media Preview -->
+  <meta property="og:title" content="🎁 You Have a Birthday Surprise!" />
+  <meta property="og:description" content="Tap the cake to blow out candles and play your special birthday tune! 🎂🎵" />
+  <meta property="og:type" content="website" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti Library -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      --primary: #ff3366;
+      --accent: #ffee00;
+    }
+
     body {
-      background: #0f172a;
-      color: #fff;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #2e0854 0%, #0f172a 75%, #030712 100%);
       min-height: 100vh;
-      margin: 0;
+      color: #ffffff;
+      overflow-x: hidden;
     }
-    .card {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 30px;
-      border-radius: 20px;
-      text-align: center;
-      max-width: 400px;
-      width: 90%;
+
+    .font-heading {
+      font-family: 'Fredoka', cursive;
     }
-    .cake {
-      font-size: 5rem;
-      cursor: pointer;
+
+    /* Glassmorphism Card */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Floating Animated Balloons Background */
+    .bg-balloon {
+      position: absolute;
+      bottom: -80px;
+      font-size: 2.2rem;
+      animation: floatUp 10s linear infinite;
+      opacity: 0.7;
       user-select: none;
-      margin: 20px 0;
-      transition: transform 0.2s;
+      pointer-events: none;
+      z-index: 1;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
     }
-    .cake:hover { transform: scale(1.1); }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+      100% { transform: translateY(-125vh) rotate(360deg); opacity: 0; }
     }
-    button {
-      padding: 10px 20px;
-      border-radius: 8px;
-      border: none;
-      background: #ff3366;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
+
+    /* Candle Flame Animations */
+    .flame {
+      animation: flicker 0.6s infinite alternate;
+      transform-origin: center bottom;
+      transition: opacity 0.4s ease, transform 0.4s ease;
     }
-    /* Hidden Offscreen YouTube Player Container */
-    #yt-hidden-player {
+
+    @keyframes flicker {
+      0% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
+      100% { transform: scale(1.2) rotate(2deg); opacity: 1; filter: drop-shadow(0 0 10px #ffee00); }
+    }
+
+    .flame.extinguished {
+      opacity: 0 !important;
+      transform: scale(0) !important;
+    }
+
+    /* Hidden Offscreen YouTube Player Container (Ensures mobile OS recognizes valid media player) */
+    #yt-offscreen-container {
       position: absolute;
       top: -9999px;
       left: -9999px;
       width: 200px;
       height: 200px;
+      overflow: hidden;
       pointer-events: none;
+      z-index: -100;
+    }
+
+    /* Toast Notification Animation */
+    .toast-pop {
+      transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
     }
   </style>
 </head>
-<body>
+<body class="flex flex-col items-center justify-center p-4 relative min-h-screen">
 
   <!-- Offscreen YouTube Player Container -->
-  <div id="yt-hidden-player"><div id="yt-player"></div></div>
+  <div id="yt-offscreen-container">
+    <div id="yt-player"></div>
+  </div>
 
-  <div class="card">
-    <h1 id="title">Happy Birthday! 🎉</h1>
+  <!-- Animated Floating Balloons Background -->
+  <div id="balloonContainer" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
+
+  <!-- Settings / Share Floating Trigger Button -->
+  <button onclick="openSettingsModal()" class="fixed top-5 right-5 z-30 w-12 h-12 rounded-full glass-card flex items-center justify-center text-white hover:bg-white/20 transition-all transform hover:rotate-45 active:scale-95 shadow-xl" title="Configure Wish & Song">
+    <i class="fa-solid fa-gear text-lg"></i>
+  </button>
+
+  <!-- Main Interactive Celebration Card -->
+  <main class="glass-card w-full max-w-lg rounded-3xl p-6 sm:p-8 text-center relative z-10 my-auto my-6 border border-white/20">
     
-    <div class="cake" onclick="handleCakeClick()">🎂</div>
-    <p>Tap cake to blow candles & play music!</p>
+    <!-- Recipient Name Title -->
+    <h1 class="font-heading text-4xl sm:text-5xl font-bold bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-300 bg-clip-text text-transparent leading-tight mb-3 animate-pulse">
+      Happy Birthday, <br><span id="displayName" class="text-amber-300">Birthday Star</span>! 🎉
+    </h1>
 
-    <div style="margin-top: 20px; text-align: left;">
-      <label>Paste YouTube Link:</label>
-      <input type="text" id="ytUrlInput" placeholder="https://www.youtube.com/watch?v=...">
-      <button onclick="saveAndLoadYouTube()">Save & Load Track</button>
+    <!-- Custom Birthday Wish Message -->
+    <p id="displayWish" class="text-slate-200 text-base sm:text-lg my-3 font-normal leading-relaxed">
+      Wishing you a magical day filled with joy, happiness, laughter, and all your favorite things!
+    </p>
+
+    <!-- Music Track Status Indicator Badge -->
+    <div id="musicStatusBadge" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 text-xs text-amber-300 border border-amber-300/30 my-2">
+      <i class="fa-brands fa-youtube text-red-500 text-sm"></i> <span id="musicStatusText">Loading song link...</span>
+    </div>
+
+    <!-- Interactive Birthday Cake -->
+    <div class="relative my-6 inline-block cursor-pointer select-none group" onclick="blowCandlesAndPlayMusic()">
+      <div class="relative flex flex-col items-center">
+        <!-- SVG Animated Candles -->
+        <div class="flex gap-5 mb-[-8px] z-10">
+          <div class="relative flex flex-col items-center">
+            <div id="flame1" class="flame w-3.5 h-5 bg-amber-400 rounded-full mb-1"></div>
+            <div class="w-2.5 h-8 bg-gradient-to-b from-pink-400 to-rose-600 rounded-sm"></div>
+          </div>
+          <div class="relative flex flex-col items-center">
+            <div id="flame2" class="flame w-3.5 h-5 bg-amber-400 rounded-full mb-1" style="animation-delay: 0.2s;"></div>
+            <div class="w-2.5 h-9 bg-gradient-to-b from-blue-400 to-indigo-600 rounded-sm"></div>
+          </div>
+          <div class="relative flex flex-col items-center">
+            <div id="flame3" class="flame w-3.5 h-5 bg-amber-400 rounded-full mb-1" style="animation-delay: 0.4s;"></div>
+            <div class="w-2.5 h-8 bg-gradient-to-b from-yellow-400 to-amber-600 rounded-sm"></div>
+          </div>
+        </div>
+        
+        <!-- Big Cake Emoji -->
+        <span id="cakeEmoji" class="text-8xl sm:text-9xl transition-transform duration-300 group-hover:scale-105 filter drop-shadow-xl">🎂</span>
+      </div>
+
+      <div id="cakeHint" class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pink-500/20 text-xs sm:text-sm text-pink-200 border border-pink-400/40 shadow-inner font-medium">
+        <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Tap cake to blow candles & play song!
+      </div>
+    </div>
+
+    <!-- Action Bar Controls -->
+    <div class="flex justify-center items-center gap-4 my-3">
+      <button onclick="toggleAudio()" id="musicToggleBtn" class="w-12 h-12 rounded-full glass-card flex items-center justify-center text-xl hover:bg-white/20 transition-transform active:scale-95 shadow-md" title="Play/Pause Audio">
+        <i class="fa-solid fa-music text-amber-300" id="musicIcon"></i>
+      </button>
+      <button onclick="triggerConfetti()" class="w-12 h-12 rounded-full glass-card flex items-center justify-center text-xl hover:bg-white/20 transition-transform active:scale-95 shadow-md" title="Pop Confetti">
+        🎉
+      </button>
+      <button onclick="openSettingsModal()" class="w-12 h-12 rounded-full glass-card flex items-center justify-center text-xl hover:bg-white/20 transition-transform active:scale-95 shadow-md" title="Create Custom Wish">
+        🎁
+      </button>
+    </div>
+
+    <!-- Interactive Surprise Gift Box -->
+    <div class="mt-5 pt-4 border-t border-white/10">
+      <p class="text-xs text-slate-300 uppercase tracking-wider mb-2">You have a secret birthday gift!</p>
+      <button onclick="openGift()" class="text-5xl sm:text-6xl animate-bounce hover:scale-110 transition-transform active:scale-90 focus:outline-none">
+        <span id="giftIcon">🎁</span>
+      </button>
+      
+      <div id="giftMessage" class="hidden mt-4 p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 to-pink-500/20 border border-amber-300/40 text-amber-100 text-sm sm:text-base font-semibold shadow-lg">
+        ✨ <strong class="text-yellow-300">SPECIAL BIRTHDAY WISH!</strong><br>
+        "May this new chapter bring you endless success, good health, unforgettable memories, and pure happiness!" 🥂🎉
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Settings & Share Modal Overlay -->
+  <div id="settingsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-white/20 rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex justify-between items-center mb-5 border-b border-white/10 pb-3">
+        <h3 class="font-heading text-xl font-bold text-amber-300 flex items-center gap-2">
+          <i class="fa-solid fa-gift"></i> Create Birthday Wish Link
+        </h3>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white text-2xl font-bold">&times;</button>
+      </div>
+
+      <!-- Sender Form Inputs -->
+      <div class="space-y-4 text-left">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">1. Birthday Person's Name:</label>
+          <input type="text" id="inputName" placeholder="e.g. Rahul, Sarah, Mom" class="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-pink-500 text-sm">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">2. Custom Wish Message:</label>
+          <textarea id="inputWish" rows="3" placeholder="Write your heartfelt birthday wish here..." class="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-pink-500 text-sm"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-amber-300 mb-1 flex items-center gap-2">
+            <i class="fa-brands fa-youtube text-red-500 text-base"></i> 3. YouTube Song Link:
+          </label>
+          <input type="url" id="inputYtUrl" placeholder="Paste YouTube link (Watch, Shorts, Music, Share)" class="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/15 text-white placeholder-slate-500 focus:outline-none focus:border-pink-500 text-sm">
+          <p class="text-[11px] text-slate-400 mt-1">Paste any link like <i>https://www.youtube.com/watch?v=...</i> or <i>youtu.be/...</i></p>
+        </div>
+      </div>
+
+      <!-- Action Buttons for Sender -->
+      <div class="mt-6 space-y-2.5">
+        <button onclick="applyPreviewSettings()" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 font-bold text-white text-sm border border-white/15 shadow-md active:scale-95 transition-all flex items-center justify-center gap-2">
+          <i class="fa-solid fa-eye"></i> Preview on This Page
+        </button>
+
+        <button onclick="copyShareableLink()" class="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-amber-500 font-bold text-white text-sm shadow-lg hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
+          <i class="fa-solid fa-copy"></i> Copy Shareable Link
+        </button>
+
+        <button onclick="shareToWhatsApp()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 font-bold text-white text-sm shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+          <i class="fa-brands fa-whatsapp text-lg"></i> Share via WhatsApp
+        </button>
+      </div>
+
     </div>
   </div>
 
+  <!-- Toast Notification Alert -->
+  <div id="toast" class="toast-pop fixed bottom-6 left-1/2 -translate-x-1/2 bg-emerald-500 text-white font-semibold px-6 py-2.5 rounded-full shadow-2xl pointer-events-none z-50 opacity-0 transform translate-y-10 text-sm">
+    Copied to clipboard! 📋
+  </div>
+
+  <!-- YouTube IFrame API Script -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
   <script>
+    
+    // Application State Variables
     let ytPlayer = null;
     let isYTReady = false;
-    let currentVideoId = '';
+    let activeYtVideoId = '';
+    let isAudioPlaying = false;
+    let candlesBlown = false;
 
-    // Advanced YouTube Video ID Extractor
-    function extractYouTubeId(url) {
-      if (!url) return null;
+    /**
+     * Robust YouTube ID Extractor
+     * Supports:
+     * - https://www.youtube.com/watch?v=VIDEO_ID
+     * - https://youtu.be/VIDEO_ID
+     * - https://youtube.com/shorts/VIDEO_ID
+     * - https://music.youtube.com/watch?v=VIDEO_ID
+     * - Raw 11-character Video ID
+     */
+    function parseYouTubeVideoId(input) {
+      if (!input || typeof input !== 'string') return '';
+      input = input.trim();
+      
+      // If user pasted direct 11-char ID
+      if (input.length === 11 && !input.includes('/') && !input.includes('.')) {
+        return input;
+      }
+
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
+      const match = input.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : '';
     }
 
-    // Initialize YouTube IFrame API
-    function onYouTubeIframeAPIReady() {
-      ytPlayer = new YT.Player('yt-player', {
-        height: '200',
-        width: '200',
-        videoId: '',
-        playerVars: {
-          'autoplay': 0,
-          'controls': 0,
-          'disablekb': 1,
-          'enablejsapi': 1
-        },
-        events: {
-          'onReady': () => { isYTReady = true; },
-          'onError': (e) => {
-            console.warn("YouTube Player Error (Video may disable embedding):", e.data);
-            alert("This video cannot be played because embedding is disabled by the creator.");
+    // Official Callback invoked when YouTube IFrame API JavaScript is fully loaded
+    window.onYouTubeIframeAPIReady = function() {
+      try {
+        ytPlayer = new YT.Player('yt-player', {
+          height: '200',
+          width: '200',
+          videoId: activeYtVideoId || '',
+          playerVars: {
+            'autoplay': 0,
+            'controls': 0,
+            'disablekb': 1,
+            'enablejsapi': 1,
+            'playsinline': 1, // Crucial for mobile iOS/Android
+            'loop': 1
+          },
+          events: {
+            'onReady': () => {
+              isYTReady = true;
+              if (activeYtVideoId) {
+                ytPlayer.cueVideoById(activeYtVideoId);
+              }
+            },
+            'onError': (e) => {
+              console.warn("YouTube Player error:", e.data);
+              updateMusicBadge("⚠️ Video restricted from embedding. Playing default tune.");
+            }
           }
-        }
-      });
-    }
-
-    function saveAndLoadYouTube() {
-      const url = document.getElementById('ytUrlInput').value.trim();
-      const videoId = extractYouTubeId(url);
-
-      if (!videoId) {
-        alert("Invalid YouTube Link. Please paste a valid YouTube video or shorts URL.");
-        return;
+        });
+      } catch (err) {
+        console.warn("YouTube initialization error:", err);
       }
+    };
 
-      currentVideoId = videoId;
-      localStorage.setItem('saved_yt_id', videoId);
-
-      if (isYTReady && ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
-        ytPlayer.cueVideoById(videoId);
-        alert("YouTube Track Loaded! Tap the cake to play.");
-      }
-    }
-
-    function handleCakeClick() {
-      // Trigger Confetti
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-
-      // Play YouTube Music
-      if (currentVideoId && isYTReady && ytPlayer) {
-        if (typeof ytPlayer.playVideo === 'function') {
-          ytPlayer.loadVideoById(currentVideoId);
-          ytPlayer.playVideo();
-        }
-      } else if (!currentVideoId) {
-        alert("Please paste a YouTube link first!");
-      }
-    }
-
-    // Auto-load saved video ID on start
     window.addEventListener('DOMContentLoaded', () => {
-      const savedId = localStorage.getItem('saved_yt_id');
-      if (savedId) {
-        currentVideoId = savedId;
-      }
-    });
-  </script>
+      // Parse Query Parameters from URL (?name=...&wish=...&yt=...)
+      const urlParams = new URLSearchParams(window.location.search);
+      const nameParam = urlParams.get('name');
+      const wishParam = urlParams.get('wish');
+      const ytParam = urlParams.get('yt');
 
-  <script src="https://www.youtube.com/iframe_api"></script>
+      const name = nameParam || 'Birthday Star';
+      const wish = wishParam || 'Wishing you a magical day filled with love, laughter, and endless happiness!';
+      
+      document.getElementById('displayName').innerText = name;
+      document.getElementById('displayWish').innerText = wish;
+      document.getElementById('inputName').value = name;
+      document.getElementById('inputWish').value = wish;
+
+      if (ytParam) {
+        activeYtVideoId = parseYouTubeVideoId(ytParam);
+        document.getElementById('inputYtUrl').value = `https://www.youtube.com/watch?v=${activeYtVideoId}`;
+        updateMusicBadge("Custom YouTube Track Ready 🎵");
+      } else {
+        updateMusicBadge("Default Audio Tune 🎵");
+      }
+
+      createFloatingBalloons();
+      setTimeout(triggerConfetti, 600);
+    });
+
+    function updateMusicBadge(text) {
+      document.getElementById('musicStatusText').innerText = text;
+    }
+
+
+    /**
+     * Triggered directly when recipient taps the cake
+     * Satisfies Mobile Browser Autoplay requirements by calling playVideo inside click handler!
+     */
+    function blowCandlesAndPlayMusic() {
+      // Extinguish Flames
+      document.getElementById('flame1').classList.add('extinguished');
+      document.getElementById('flame2').classList.add('extinguished');
+      document.getElementById('flame3').classList.add('extinguished');
+
+      if (!candlesBlown) {
+        candlesBlown = true;
+        document.getElementById('cakeHint').innerHTML = '✨ Candles blown out! Wishes coming true! ✨';
+        triggerConfetti();
+      }
+
+      playYouTubeAudio();
+    }
+
+    function playYouTubeAudio() {
+      if (activeYtVideoId && isYTReady && ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
+        try {
+          ytPlayer.loadVideoById(activeYtVideoId);
+          ytPlayer.playVideo();
+          isAudioPlaying = true;
+          updateMusicIcon(true);
+          updateMusicBadge("Playing YouTube Audio 🎶");
+          return;
+        } catch (e) {
+          console.warn("Error playing YT audio:", e);
+        }
+      }
+
+      // Fallback: Web Audio Synth Happy Birthday Tune
+      playSynthHappyBirthday();
+      isAudioPlaying = true;
+      updateMusicIcon(true);
+      updateMusicBadge("Playing Birthday Melody 🎵");
+    }
+
+    function toggleAudio() {
+      if (isAudioPlaying) {
+        if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+          try { ytPlayer.pauseVideo(); } catch (e) {}
+        }
+        isAudioPlaying = false;
+        updateMusicIcon(false);
+      } else {
+        playYouTubeAudio();
+      }
+    }
+
+    function updateMusicIcon(playing) {
+      const icon = document.getElementById('musicIcon');
+      if (icon) {
+        icon.className = playing ? "fa-solid fa-pause text-amber-300" : "fa-solid fa-music text-amber-300";
+      }
+    }
+
+    // Fallback Web Audio Synthesizer Tune
+    let audioCtx = null;
+    function playSynthHappyBirthday() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!audioCtx) audioCtx = new AudioCtx();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        
+        const tempo = 160;
+        const beat = 60 / tempo;
+        const notes = [
+          [261.63, 0.75], [261.63, 0.25], [293.66, 1], [261.63, 1], [349.23, 1], [329.63, 2],
+          [261.63, 0.75], [261.63, 0.25], [293.66, 1], [261.63, 1], [392.00, 1], [349.23, 2]
+        ];
+
+        let now = audioCtx.currentTime;
+        notes.forEach(([freq, durationBeats]) => {
+          const duration = durationBeats * beat;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration - 0.03);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + duration);
+          now += duration;
+        });
+      } catch (e) {}
+    }
+
+    function openGift() {
+      document.getElementById('giftIcon').innerText = '🎁✨';
+      document.getElementById('giftMessage').classList.remove('hidden');
+      triggerConfetti();
+      playYouTubeAudio();
+    }
+
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+      }
+    }
+
+
+    function openSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    function buildShareableURL() {
+      const name = document.getElementById('inputName').value.trim() || 'Birthday Star';
+      const wish = document.getElementById('inputWish').value.trim() || 'Happy Birthday!';
+      const rawYtUrl = document.getElementById('inputYtUrl').value.trim();
+      const videoId = parseYouTubeVideoId(rawYtUrl);
+
+      const baseURL = window.location.protocol + '//' + window.location.host + window.location.pathname;
+      let shareURL = `${baseURL}?name=${encodeURIComponent(name)}&wish=${encodeURIComponent(wish)}`;
+      if (videoId) {
+        shareURL += `&yt=${encodeURIComponent(videoId)}`;
+      }
+      return { shareURL, name, wish, videoId };
+    }
+
+    function applyPreviewSettings() {
+      const { name, wish, videoId } = buildShareableURL();
+      
+      document.getElementById('displayName').innerText = name;
+      document.getElementById('displayWish').innerText = wish;
+      
+      if (videoId) {
+        activeYtVideoId = videoId;
+        if (isYTReady && ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
+          ytPlayer.cueVideoById(videoId);
+        }
+        updateMusicBadge("Custom YouTube Track Loaded 🎵");
+      }
+
+      showToast("Preview updated! 🎉");
+      closeSettingsModal();
+    }
+
+    function copyShareableLink() {
+      const { shareURL } = buildShareableURL();
+      
+      // Iframe-friendly Clipboard Fallback
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(shareURL).then(() => {
+          showToast("Shareable Link Copied! 📋");
+        }).catch(() => fallbackCopyText(shareURL));
+      } else {
+        fallbackCopyText(shareURL);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast("Shareable Link Copied! 📋");
+      } catch (err) {
+        showToast("Copy failed. Please copy URL manually.");
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function shareToWhatsApp() {
+      const { shareURL, name } = buildShareableURL();
+      const text = `🤫 Hey ${name}, someone sent you a surprise birthday gift card!\n\nTap the link below to blow out your candles & play your custom birthday song: 👇\n${shareURL}`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.remove('opacity-0', 'translate-y-10');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'translate-y-10');
+      }, 3000);
+    }
+
+    function createFloatingBalloons() {
+      const container = document.getElementById('balloonContainer');
+      const emojis = ['🎈', '✨', '🎉', '🌟', '🎈'];
+      for (let i = 0; i < 14; i++) {
+        const balloon = document.createElement('div');
+        balloon.className = 'bg-balloon';
+        balloon.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+        balloon.style.left = `${Math.random() * 92}%`;
+        balloon.style.animationDuration = `${7 + Math.random() * 8}s`;
+        balloon.style.animationDelay = `${Math.random() * 6}s`;
+        container.appendChild(balloon);
+      }
+    }
+  </script>
 </body>
 </html>
