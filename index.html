@@ -152,7 +152,7 @@
       font-weight: 700;
     }
 
-    /* Main Container with Multi-Sections */
+    /* Main Container with 2 Sections Only */
     .main-container {
       display: none;
       width: 100%;
@@ -295,95 +295,6 @@
       color: #94a3b8;
     }
 
-    /* Photo Album Carousel */
-    .album-frame {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 20px;
-      min-height: 180px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .album-img-placeholder {
-      font-size: 3.5rem;
-      margin-bottom: 10px;
-    }
-
-    .album-caption {
-      font-size: 0.85rem;
-      color: #fbcfe8;
-      font-style: italic;
-    }
-
-    .album-nav {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .nav-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: #fff;
-      padding: 8px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 0.8rem;
-    }
-
-    /* Interactive Flowers / Wishes */
-    .flowers-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .flower-box {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      padding: 16px 8px;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.2s;
-    }
-
-    .flower-box:hover {
-      background: rgba(255, 255, 255, 0.12);
-      transform: scale(1.05);
-    }
-
-    .flower-icon {
-      font-size: 1.8rem;
-      margin-bottom: 6px;
-    }
-
-    .flower-box span {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #f472b6;
-      font-weight: 700;
-    }
-
-    .wish-display {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 14px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      color: #fbcfe8;
-      min-height: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-      font-style: italic;
-    }
-
     /* Letter Section */
     .letter-box {
       background: #fdf4f5;
@@ -513,7 +424,7 @@
     </div>
   </div>
 
-  <!-- MAIN MULTI-SECTION CONTAINER -->
+  <!-- MAIN CONTAINER (Only Section 1 and Section 4 Letter) -->
   <div class="main-container" id="mainContainer">
 
     <!-- SECTION 1: MAIN CARD & MUSIC -->
@@ -534,54 +445,10 @@
         </div>
       </div>
 
-      <button class="action-btn" onclick="nextSection(2)">See Cool Album <i class="fa-solid fa-arrow-right"></i></button>
-    </div>
-
-    <!-- SECTION 2: PHOTO ALBUM -->
-    <div class="section-card" id="sec2">
-      <div class="greeting">Our Memories</div>
-      <h1>Cool Album 📸</h1>
-      
-      <div class="album-frame">
-        <div class="album-img-placeholder" id="albumEmoji">🧸</div>
-        <p class="album-caption" id="albumCaption">"The way you smile in every photo — I hope you know it lights up the room."</p>
-      </div>
-
-      <div class="album-nav">
-        <button class="nav-btn" onclick="prevPhoto()"><i class="fa-solid fa-chevron-left"></i> Prev</button>
-        <button class="nav-btn" onclick="nextPhoto()">Next <i class="fa-solid fa-chevron-right"></i></button>
-      </div>
-
-      <button class="action-btn" onclick="nextSection(3)" style="margin-top: 20px;">Pick Wishes <i class="fa-solid fa-arrow-right"></i></button>
-    </div>
-
-    <!-- SECTION 3: WISH BOUQUET -->
-    <div class="section-card" id="sec3">
-      <div class="greeting">A Tiny Bouquet</div>
-      <h1>Three Wishes 🌷</h1>
-      <p class="message-text" style="margin-bottom: 12px; font-size: 0.85rem;">Pick each flower — there's a little wish inside.</p>
-      
-      <div class="flowers-grid">
-        <div class="flower-box" onclick="revealWish(1)">
-          <div class="flower-icon">🌻</div>
-          <span>Pick Me</span>
-        </div>
-        <div class="flower-box" onclick="revealWish(2)">
-          <div class="flower-icon">🌹</div>
-          <span>Pick Me</span>
-        </div>
-        <div class="flower-box" onclick="revealWish(3)">
-          <div class="flower-icon">🌷</div>
-          <span>Pick Me</span>
-        </div>
-      </div>
-
-      <div class="wish-display" id="wishDisplay">Tap any flower above to read its secret message!</div>
-
       <button class="action-btn" onclick="nextSection(4)">Read My Letter <i class="fa-solid fa-arrow-right"></i></button>
     </div>
 
-    <!-- SECTION 4: SECRET LETTER -->
+    <!-- SECTION 2 (Originally Section 4): SECRET LETTER -->
     <div class="section-card" id="sec4">
       <div class="greeting">A Letter Just For You</div>
       <h1>My Heartfelt Note 💌</h1>
@@ -698,7 +565,7 @@
       }
     }
 
-    // Section Navigation
+    // Section Navigation (Directly between Card and Letter)
     function nextSection(secNum) {
       document.querySelectorAll('.section-card').forEach(card => card.classList.remove('active'));
       document.getElementById('sec' + secNum).classList.add('active');
@@ -713,40 +580,6 @@
       if (isYTReady && ytPlayer && typeof ytPlayer.stopVideo === 'function') {
         ytPlayer.stopVideo();
       }
-    }
-
-    // Photo Album Carousel
-    const albumData = [
-      { emoji: '🧸', caption: '"The way you smile in every photo — I hope you know it lights up the room."' },
-      { emoji: '🧁', caption: '"Ordinary days with you have always been my favourite ones."' },
-      { emoji: '💖', caption: '"Thank you for showing up — for everything, every time."' }
-    ];
-    let currentPhotoIdx = 0;
-
-    function updatePhoto() {
-      document.getElementById('albumEmoji').innerText = albumData[currentPhotoIdx].emoji;
-      document.getElementById('albumCaption').innerText = albumData[currentPhotoIdx].caption;
-    }
-
-    function nextPhoto() {
-      currentPhotoIdx = (currentPhotoIdx + 1) % albumData.length;
-      updatePhoto();
-    }
-
-    function prevPhoto() {
-      currentPhotoIdx = (currentPhotoIdx - 1 + albumData.length) % albumData.length;
-      updatePhoto();
-    }
-
-    // Flower Wishes
-    const wishes = {
-      1: '"Your laugh is one of those sounds that just makes a room feel warmer. Wishing you a year full of all the kind of memories that bring it out again and again."',
-      2: '"May you remember the small things — a worry from a Tuesday, the random text on a hard day. It always feels like being seen, not just heard, wishing you the same softness back."',
-      3: '"May this year be kinder than the last; may every new chapter bring you good food, better paths, and people who love you the way your heart deserves."'
-    };
-
-    function revealWish(id) {
-      document.getElementById('wishDisplay').innerText = wishes[id];
     }
 
     // Modal Controls
