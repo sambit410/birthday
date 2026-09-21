@@ -74,6 +74,37 @@
       }
     }
 
+    /* Dancing Characters (Joker & Teddy) */
+    .dancer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 4.5rem;
+      user-select: none;
+      display: none;
+      z-index: 12;
+      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+    }
+
+    .dancer.left {
+      left: 8%;
+      animation: danceLeft 1.2s ease-in-out infinite alternate;
+    }
+
+    .dancer.right {
+      right: 8%;
+      animation: danceRight 1.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes danceLeft {
+      0% { transform: translateY(0) rotate(-15deg) scale(1); }
+      100% { transform: translateY(-25px) rotate(15deg) scale(1.1); }
+    }
+
+    @keyframes danceRight {
+      0% { transform: translateY(0) rotate(15deg) scale(1); }
+      100% { transform: translateY(-25px) rotate(-15deg) scale(1.1); }
+    }
+
     /* Minimal Settings Button */
     .settings-gear-btn {
       position: absolute;
@@ -292,7 +323,7 @@
 
     .btn:hover { opacity: 0.9; }
 
-    /* Hidden YouTube Player (Required for audio execution on mobile) */
+    /* Hidden YouTube Player */
     #yt-hidden-container {
       position: absolute;
       top: -9999px;
@@ -301,12 +332,22 @@
       height: 200px;
       pointer-events: none;
     }
+
+    /* Responsive adjustments for dancers on small screens */
+    @media(max-width: 600px) {
+      .dancer.left { left: 2%; font-size: 3.5rem; }
+      .dancer.right { right: 2%; font-size: 3.5rem; }
+    }
   </style>
 </head>
 <body>
 
   <div class="bg-glow"></div>
   <div id="rain-container"></div>
+
+  <!-- Dancing Characters -->
+  <div class="dancer left" id="jokerDancer">🃏</div>
+  <div class="dancer right" id="teddyDancer">🧸</div>
 
   <!-- Offscreen YouTube Player Container -->
   <div id="yt-hidden-container">
@@ -324,7 +365,7 @@
       <div class="cake" id="cakeEmoji">🎂</div>
     </div>
     
-    <span class="tap-hint" id="tapHint">👇 Tap cake to play song</span>
+    <span class="tap-hint" id="tapHint">👇 Tap cake to play song & dance</span>
 
     <div class="subtitle">Happy Birthday</div>
     <h1><span class="highlight-name" id="displayName">Alex</span> 🎉</h1>
@@ -332,7 +373,7 @@
     <p class="wish" id="displayWish">Wishing you a wonderful day filled with happiness, laughter, and great memories!</p>
 
     <div class="music-status" id="musicStatus">
-      <i class="fa-solid fa-music"></i> Playing song...
+      <i class="fa-solid fa-music"></i> Playing song & party mode active!
     </div>
   </div>
 
@@ -372,12 +413,15 @@
     let targetVideoId = '';
     let rainInterval = null;
 
-    // Birthday rain elements
     const birthdayItems = ['🎈', '🎂', '🎁', '🎉', '✨', '🥳', '🧁', '⭐'];
 
-    function startBirthdayRain() {
-      if (rainInterval) return; // Prevent multiple rain timers
+    function startPartyEffects() {
+      // 1. Show and animate dancing characters
+      document.getElementById('jokerDancer').style.display = 'block';
+      document.getElementById('teddyDancer').style.display = 'block';
 
+      // 2. Start rain if not already running
+      if (rainInterval) return;
       const rainContainer = document.getElementById('rain-container');
       
       rainInterval = setInterval(() => {
@@ -385,10 +429,9 @@
         item.classList.add('falling-item');
         item.innerText = birthdayItems[Math.floor(Math.random() * birthdayItems.length)];
         
-        // Random horizontal position, duration, and size
         const startLeft = Math.random() * 100;
-        const duration = 3 + Math.random() * 3; // 3s to 6s
-        const fontSize = 1.2 + Math.random() * 1.2; // 1.2rem to 2.4rem
+        const duration = 3 + Math.random() * 3;
+        const fontSize = 1.2 + Math.random() * 1.2;
 
         item.style.left = startLeft + 'vw';
         item.style.animationDuration = duration + 's';
@@ -396,14 +439,13 @@
 
         rainContainer.appendChild(item);
 
-        // Remove element after animation finishes
         setTimeout(() => {
           item.remove();
         }, duration * 1000);
       }, 300);
     }
 
-    // Extract 11-character video ID from YouTube links
+    // Extract YouTube ID
     function parseYouTubeId(url) {
       if (!url) return null;
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -411,18 +453,12 @@
       return (match && match[2].length === 11) ? match[2] : null;
     }
 
-    // Called automatically when YouTube API loads
     function onYouTubeIframeAPIReady() {
       ytPlayer = new YT.Player('yt-player', {
         height: '200',
         width: '200',
         videoId: '',
-        playerVars: {
-          'autoplay': 0,
-          'controls': 0,
-          'disablekb': 1,
-          'enablejsapi': 1
-        },
+        playerVars: { 'autoplay': 0, 'controls': 0, 'disablekb': 1, 'enablejsapi': 1 },
         events: {
           'onReady': () => {
             isYTReady = true;
@@ -437,7 +473,6 @@
       });
     }
 
-    // Read URL parameters on startup
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const name = params.get('name') || 'Alex';
@@ -456,17 +491,16 @@
       }
     });
 
-    // Handle Cake Click
     function onCakeClick() {
-      // 1. Pop Confetti
+      // Confetti burst
       if (typeof confetti === 'function') {
         confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
       }
 
-      // 2. Start Birthday Rain Effect
-      startBirthdayRain();
+      // Trigger Dancers & Rain
+      startPartyEffects();
 
-      // 3. Play YouTube Audio
+      // Play Audio
       if (targetVideoId && isYTReady && ytPlayer) {
         if (typeof ytPlayer.playVideo === 'function') {
           ytPlayer.loadVideoById(targetVideoId);
@@ -494,7 +528,6 @@
       }
     };
 
-    // Build the shareable URL
     function getShareUrl() {
       const name = document.getElementById('inputName').value.trim() || 'Friend';
       const wish = document.getElementById('inputWish').value.trim() || 'Happy Birthday!';
@@ -526,7 +559,7 @@
     function shareWhatsApp() {
       const link = getShareUrl();
       const name = document.getElementById('inputName').value.trim() || 'Friend';
-      const text = `🎉 Happy Birthday ${name}! View your birthday card & song here:\n${link}`;
+      const text = `🎉 Happy Birthday ${name}! View your birthday card & dancing song here:\n${link}`;
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
       closeModal();
     }
