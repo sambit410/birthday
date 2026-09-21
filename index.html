@@ -259,7 +259,7 @@
       box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
     }
 
-    /* Ad-Free Universal MP3 Music Player Widget */
+    /* Minimal Clean Music Player Widget */
     .music-player-widget {
       background: rgba(25, 20, 30, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.12);
@@ -309,32 +309,26 @@
     }
 
     .track-title {
-      font-size: 0.88rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: #ffffff;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-bottom: 2px;
-    }
-
-    .track-subtitle {
-      font-size: 0.75rem;
-      color: #94a3b8;
     }
 
     .control-btn {
       background: rgba(255, 255, 255, 0.08);
       border: none;
       color: #fff;
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 1rem;
       transition: background 0.2s, transform 0.2s;
       flex-shrink: 0;
     }
@@ -379,7 +373,7 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 24px;
       padding: 28px;
-      max-width: 400px;
+      max-width: 420px;
       width: 100%;
       max-height: 90vh;
       overflow-y: auto;
@@ -390,7 +384,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
     }
 
     .modal-header h3 {
@@ -423,7 +417,7 @@
     input, textarea {
       width: 100%;
       padding: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       border-radius: 10px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       background: rgba(255, 255, 255, 0.03);
@@ -438,13 +432,39 @@
       border-color: #e11d48;
     }
 
-    .hint-note {
-      font-size: 0.75rem;
-      color: #94a3b8;
-      margin-top: -10px;
-      margin-bottom: 15px;
+    /* Important Guide Box for User */
+    .guide-box {
+      background: rgba(225, 29, 72, 0.08);
+      border: 1px solid rgba(225, 29, 72, 0.25);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
       text-align: left;
-      line-height: 1.4;
+    }
+
+    .guide-box h4 {
+      font-size: 0.82rem;
+      color: #fbcfe8;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .guide-box ol {
+      padding-left: 16px;
+      font-size: 0.75rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .guide-box li {
+      margin-bottom: 4px;
+    }
+
+    .guide-box a {
+      color: #ff758c;
+      text-decoration: underline;
     }
   </style>
 </head>
@@ -483,12 +503,11 @@
       <h1 id="displayName">Sambit Kumar Sahoo</h1>
       <p class="message-text" id="displayIntro">Love you</p>
       
-      <!-- Sleek Ad-Free Universal Music Widget -->
+      <!-- Clean Minimal Music Player Widget -->
       <div class="music-player-widget">
         <div class="album-art" id="albumArtIcon"><i class="fa-solid fa-music"></i></div>
         <div class="track-info">
           <div class="track-title" id="displaySongTitle">Special Song</div>
-          <div class="track-subtitle" id="displaySongArtist">Ad-Free Background Melody</div>
         </div>
         <button class="control-btn" id="playPauseBtn" onclick="togglePlayPause()" title="Play / Pause">
           <i class="fa-solid fa-play" id="playPauseIcon"></i>
@@ -522,6 +541,17 @@
         <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
+      <!-- MUST-READ USER GUIDE FOR MUSIC -->
+      <div class="guide-box">
+        <h4><i class="fa-solid fa-circle-info"></i> How to Add Custom Music (Must Read):</h4>
+        <ol>
+          <li>Go to <a href="https://catbox.moe" target="_blank">Catbox.moe</a> on your browser.</li>
+          <li>Upload your song (.mp3 file) and click upload.</li>
+          <li>Copy the generated direct file link ending in <b>.mp3</b>.</li>
+          <li>Paste that link into the box below and click share!</li>
+        </ol>
+      </div>
+
       <label for="inputName">Card Title / Recipient Name</label>
       <input type="text" id="inputName" placeholder="Sambit Kumar Sahoo" value="Sambit Kumar Sahoo">
 
@@ -531,9 +561,8 @@
       <label for="inputLetter">Secret Letter Message</label>
       <textarea id="inputLetter" rows="4" placeholder="Write your heartfelt letter..."></textarea>
 
-      <label for="inputAudioUrl">Any Direct MP3 File Link</label>
-      <input type="url" id="inputAudioUrl" placeholder="https://.../song.mp3">
-      <div class="hint-note">Paste a direct link to any MP3 file from the web. It plays instantly with 100% clean sound, zero video pop-ups, and zero ads!</div>
+      <label for="inputAudioUrl">Direct MP3 File Link</label>
+      <input type="url" id="inputAudioUrl" placeholder="https://files.catbox.moe/xxxxxx.mp3">
 
       <button class="action-btn" onclick="copyCustomLink()" style="margin-bottom: 10px;">
         <i class="fa-solid fa-link"></i> Copy Shareable Link
@@ -596,6 +625,15 @@
       if (audioParam) {
         currentAudioUrl = decodeURIComponent(audioParam);
         document.getElementById('inputAudioUrl').value = currentAudioUrl;
+        
+        // Extract clean file name for title display
+        try {
+          const urlObj = new URL(currentAudioUrl);
+          let filename = urlObj.pathname.split('/').pop();
+          if (filename) {
+            document.getElementById('displaySongTitle').innerText = decodeURIComponent(filename);
+          }
+        } catch(e) {}
       } else {
         currentAudioUrl = defaultAudioUrl;
         document.getElementById('inputAudioUrl').value = defaultAudioUrl;
@@ -660,6 +698,13 @@
       if (rawAudio) {
         currentAudioUrl = rawAudio;
         audioElement.src = currentAudioUrl;
+        try {
+          const urlObj = new URL(currentAudioUrl);
+          let filename = urlObj.pathname.split('/').pop();
+          if (filename) {
+            document.getElementById('displaySongTitle').innerText = decodeURIComponent(filename);
+          }
+        } catch(e) {}
       }
 
       const baseUrl = window.location.origin + window.location.pathname;
