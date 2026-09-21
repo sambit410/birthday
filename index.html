@@ -152,7 +152,7 @@
       font-weight: 700;
     }
 
-    /* Main Container with 2 Sections Only */
+    /* Main Container */
     .main-container {
       display: none;
       width: 100%;
@@ -259,8 +259,8 @@
       box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
     }
 
-    /* Google Drive Music Player Widget */
-    .gdrive-music-player {
+    /* Ad-Free Universal MP3 Music Player Widget */
+    .music-player-widget {
       background: rgba(25, 20, 30, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 18px;
@@ -273,10 +273,10 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
 
-    .gdrive-album-art {
+    .album-art {
       width: 48px;
       height: 48px;
-      background: linear-gradient(135deg, #4285F4, #34A853);
+      background: linear-gradient(135deg, #e11d48, #f43f5e);
       border-radius: 12px;
       display: flex;
       align-items: center;
@@ -284,17 +284,17 @@
       font-size: 1.2rem;
       color: #fff;
       flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.4);
       position: relative;
     }
 
-    .gdrive-album-art.playing::after {
+    .album-art.playing::after {
       content: '';
       position: absolute;
       width: 100%;
       height: 100%;
       border-radius: 12px;
-      border: 2px solid #34A853;
+      border: 2px solid #ff758c;
       animation: pulseArt 1.5s infinite;
     }
 
@@ -303,12 +303,12 @@
       100% { transform: scale(1.15); opacity: 0; }
     }
 
-    .gdrive-track-info {
+    .track-info {
       flex-grow: 1;
       overflow: hidden;
     }
 
-    .gdrive-track-title {
+    .track-title {
       font-size: 0.88rem;
       font-weight: 700;
       color: #ffffff;
@@ -318,19 +318,12 @@
       margin-bottom: 2px;
     }
 
-    .gdrive-track-subtitle {
+    .track-subtitle {
       font-size: 0.75rem;
       color: #94a3b8;
     }
 
-    .gdrive-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    .gdrive-control-btn {
+    .control-btn {
       background: rgba(255, 255, 255, 0.08);
       border: none;
       color: #fff;
@@ -343,9 +336,10 @@
       cursor: pointer;
       font-size: 0.9rem;
       transition: background 0.2s, transform 0.2s;
+      flex-shrink: 0;
     }
 
-    .gdrive-control-btn:hover {
+    .control-btn:hover {
       background: #e11d48;
       transform: scale(1.05);
     }
@@ -443,14 +437,23 @@
     input:focus, textarea:focus {
       border-color: #e11d48;
     }
+
+    .hint-note {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-top: -10px;
+      margin-bottom: 15px;
+      text-align: left;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
 
   <div class="bg-glow"></div>
 
-  <!-- Hidden HTML5 Audio Element -->
-  <audio id="bgAudio" preload="auto" loop></audio>
+  <!-- Universal Pure HTML5 Audio Element -->
+  <audio id="bgAudio" preload="auto" crossorigin="anonymous" loop></audio>
 
   <!-- Settings Gear Button -->
   <button class="settings-gear-btn" onclick="openModal()" title="Customize Experience">
@@ -470,7 +473,7 @@
   <!-- MAIN CONTAINER -->
   <div class="main-container" id="mainContainer">
 
-    <!-- SECTION 1: MAIN CARD & GOOGLE DRIVE MUSIC PLAYER -->
+    <!-- SECTION 1: MAIN CARD & MUSIC PLAYER -->
     <div class="section-card active" id="sec1">
       <div class="toy-container">
         <div class="toy"></div>
@@ -480,18 +483,16 @@
       <h1 id="displayName">Sambit Kumar Sahoo</h1>
       <p class="message-text" id="displayIntro">Love you</p>
       
-      <!-- Google Drive Music Player Widget -->
-      <div class="gdrive-music-player">
-        <div class="gdrive-album-art" id="albumArtIcon"><i class="fa-solid fa-music"></i></div>
-        <div class="gdrive-track-info">
-          <div class="gdrive-track-title" id="displaySongTitle">Google Drive Track</div>
-          <div class="gdrive-track-subtitle" id="displaySongArtist">Ad-Free Custom Audio</div>
+      <!-- Sleek Ad-Free Universal Music Widget -->
+      <div class="music-player-widget">
+        <div class="album-art" id="albumArtIcon"><i class="fa-solid fa-music"></i></div>
+        <div class="track-info">
+          <div class="track-title" id="displaySongTitle">Special Song</div>
+          <div class="track-subtitle" id="displaySongArtist">Ad-Free Background Melody</div>
         </div>
-        <div class="gdrive-controls">
-          <button class="gdrive-control-btn" id="playPauseBtn" onclick="togglePlayPause()" title="Play / Pause">
-            <i class="fa-solid fa-play" id="playPauseIcon"></i>
-          </button>
-        </div>
+        <button class="control-btn" id="playPauseBtn" onclick="togglePlayPause()" title="Play / Pause">
+          <i class="fa-solid fa-play" id="playPauseIcon"></i>
+        </button>
       </div>
 
       <button class="action-btn" onclick="nextSection(4)">Read My Letter <i class="fa-solid fa-arrow-right"></i></button>
@@ -530,8 +531,9 @@
       <label for="inputLetter">Secret Letter Message</label>
       <textarea id="inputLetter" rows="4" placeholder="Write your heartfelt letter..."></textarea>
 
-      <label for="inputAudioUrl">Google Drive Share Link</label>
-      <input type="url" id="inputAudioUrl" placeholder="https://drive.google.com/file/d/.../view?usp=drivesdk">
+      <label for="inputAudioUrl">Any Direct MP3 File Link</label>
+      <input type="url" id="inputAudioUrl" placeholder="https://.../song.mp3">
+      <div class="hint-note">Paste a direct link to any MP3 file from the web. It plays instantly with 100% clean sound, zero video pop-ups, and zero ads!</div>
 
       <button class="action-btn" onclick="copyCustomLink()" style="margin-bottom: 10px;">
         <i class="fa-solid fa-link"></i> Copy Shareable Link
@@ -546,16 +548,6 @@
   <script>
     let defaultAudioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; 
     let currentAudioUrl = defaultAudioUrl;
-
-    // Converts normal Google Drive sharing URLs directly to a streaming audio source
-    function convertGoogleDriveLink(url) {
-      if (!url) return '';
-      let fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-      if (fileIdMatch && fileIdMatch[1]) {
-        return `https://docs.google.com/uc?export=download&id=${fileIdMatch[1]}`;
-      }
-      return url;
-    }
 
     const audioElement = document.getElementById('bgAudio');
 
@@ -606,6 +598,7 @@
         document.getElementById('inputAudioUrl').value = currentAudioUrl;
       } else {
         currentAudioUrl = defaultAudioUrl;
+        document.getElementById('inputAudioUrl').value = defaultAudioUrl;
       }
       audioElement.src = currentAudioUrl;
     });
@@ -658,16 +651,14 @@
       const intro = document.getElementById('inputIntro').value.trim();
       const letter = document.getElementById('inputLetter').value.trim();
       let rawAudio = document.getElementById('inputAudioUrl').value.trim();
-      
-      const processedAudio = convertGoogleDriveLink(rawAudio);
 
       if (name) document.getElementById('displayName').innerText = name;
       if (intro) document.getElementById('displayIntro').innerText = intro;
       if (letter) {
         document.getElementById('displayLetter').innerHTML = letter.replace(/\n/g, '<br>');
       }
-      if (processedAudio) {
-        currentAudioUrl = processedAudio;
+      if (rawAudio) {
+        currentAudioUrl = rawAudio;
         audioElement.src = currentAudioUrl;
       }
 
@@ -677,8 +668,8 @@
       if (name) params.push(`name=${encodeURIComponent(name)}`);
       if (intro) params.push(`intro=${encodeURIComponent(intro)}`);
       if (letter) params.push(`letter=${encodeURIComponent(letter)}`);
-      if (processedAudio && processedAudio !== defaultAudioUrl) {
-        params.push(`audio=${encodeURIComponent(processedAudio)}`);
+      if (rawAudio && rawAudio !== defaultAudioUrl) {
+        params.push(`audio=${encodeURIComponent(rawAudio)}`);
       }
       
       return url + params.join('&');
