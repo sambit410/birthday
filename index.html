@@ -259,8 +259,8 @@
       box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
     }
 
-    /* YouTube Music Style Player Widget */
-    .yt-music-player {
+    /* Google Drive Music Player Widget */
+    .gdrive-music-player {
       background: rgba(25, 20, 30, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 18px;
@@ -273,10 +273,10 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
 
-    .yt-album-art {
+    .gdrive-album-art {
       width: 48px;
       height: 48px;
-      background: linear-gradient(135deg, #ff0033, #ff758c);
+      background: linear-gradient(135deg, #4285F4, #34A853);
       border-radius: 12px;
       display: flex;
       align-items: center;
@@ -284,17 +284,17 @@
       font-size: 1.2rem;
       color: #fff;
       flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(255, 0, 51, 0.4);
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
       position: relative;
     }
 
-    .yt-album-art.playing::after {
+    .gdrive-album-art.playing::after {
       content: '';
       position: absolute;
       width: 100%;
       height: 100%;
       border-radius: 12px;
-      border: 2px solid #ff758c;
+      border: 2px solid #34A853;
       animation: pulseArt 1.5s infinite;
     }
 
@@ -303,12 +303,12 @@
       100% { transform: scale(1.15); opacity: 0; }
     }
 
-    .yt-track-info {
+    .gdrive-track-info {
       flex-grow: 1;
       overflow: hidden;
     }
 
-    .yt-track-title {
+    .gdrive-track-title {
       font-size: 0.88rem;
       font-weight: 700;
       color: #ffffff;
@@ -318,19 +318,19 @@
       margin-bottom: 2px;
     }
 
-    .yt-track-subtitle {
+    .gdrive-track-subtitle {
       font-size: 0.75rem;
       color: #94a3b8;
     }
 
-    .yt-controls {
+    .gdrive-controls {
       display: flex;
       align-items: center;
       gap: 10px;
       flex-shrink: 0;
     }
 
-    .yt-control-btn {
+    .gdrive-control-btn {
       background: rgba(255, 255, 255, 0.08);
       border: none;
       color: #fff;
@@ -345,7 +345,7 @@
       transition: background 0.2s, transform 0.2s;
     }
 
-    .yt-control-btn:hover {
+    .gdrive-control-btn:hover {
       background: #e11d48;
       transform: scale(1.05);
     }
@@ -443,28 +443,16 @@
     input:focus, textarea:focus {
       border-color: #e11d48;
     }
-
-    /* Hidden YouTube API IFrame */
-    #yt-hidden-container {
-      position: absolute;
-      top: -9999px;
-      left: -9999px;
-      width: 200px;
-      height: 200px;
-      pointer-events: none;
-    }
   </style>
 </head>
 <body>
 
   <div class="bg-glow"></div>
 
-  <!-- Hidden YouTube Player Container -->
-  <div id="yt-hidden-container">
-    <div id="yt-player"></div>
-  </div>
+  <!-- Hidden HTML5 Audio Element for Google Drive direct file links -->
+  <audio id="bgAudio" preload="auto" loop></audio>
 
-  <!-- Settings Gear Button (Unified Menu) -->
+  <!-- Settings Gear Button -->
   <button class="settings-gear-btn" onclick="openModal()" title="Customize Experience">
     <i class="fa-solid fa-sliders"></i>
   </button>
@@ -479,10 +467,10 @@
     </div>
   </div>
 
-  <!-- MAIN CONTAINER (Only Section 1 and Section 4 Letter) -->
+  <!-- MAIN CONTAINER -->
   <div class="main-container" id="mainContainer">
 
-    <!-- SECTION 1: MAIN CARD & YOUTUBE MUSIC PLAYER -->
+    <!-- SECTION 1: MAIN CARD & GOOGLE DRIVE MUSIC PLAYER -->
     <div class="section-card active" id="sec1">
       <div class="toy-container">
         <div class="toy"></div>
@@ -492,15 +480,15 @@
       <h1 id="displayName">Sambit Kumar Sahoo</h1>
       <p class="message-text" id="displayIntro">Love you</p>
       
-      <!-- YouTube Music Type Player Widget -->
-      <div class="yt-music-player">
-        <div class="yt-album-art" id="albumArtIcon"><i class="fa-solid fa-music"></i></div>
-        <div class="yt-track-info">
-          <div class="yt-track-title" id="displaySongTitle">YouTube Music Vibe</div>
-          <div class="yt-track-subtitle" id="displaySongArtist">Background Melody</div>
+      <!-- Google Drive Music Player Widget -->
+      <div class="gdrive-music-player">
+        <div class="gdrive-album-art" id="albumArtIcon"><i class="fa-solid fa-music"></i></div>
+        <div class="gdrive-track-info">
+          <div class="gdrive-track-title" id="displaySongTitle">Google Drive Track</div>
+          <div class="gdrive-track-subtitle" id="displaySongArtist">Ad-Free Custom Audio</div>
         </div>
-        <div class="yt-controls">
-          <button class="yt-control-btn" id="playPauseBtn" onclick="togglePlayPause()" title="Play / Pause">
+        <div class="gdrive-controls">
+          <button class="gdrive-control-btn" id="playPauseBtn" onclick="togglePlayPause()" title="Play / Pause">
             <i class="fa-solid fa-play" id="playPauseIcon"></i>
           </button>
         </div>
@@ -529,7 +517,7 @@
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Customize Card & Music</h3>
+        <h3>Customize Card & Audio</h3>
         <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
@@ -542,8 +530,8 @@
       <label for="inputLetter">Secret Letter Message</label>
       <textarea id="inputLetter" rows="4" placeholder="Write your heartfelt letter..."></textarea>
 
-      <label for="inputYtUrl">YouTube Music Link</label>
-      <input type="url" id="inputYtUrl" placeholder="https://www.youtube.com/watch?v=...">
+      <label for="inputAudioUrl">Google Drive Direct Audio Link (mp3)</label>
+      <input type="url" id="inputAudioUrl" placeholder="https://docs.google.com/uc?export=download&id=YOUR_FILE_ID">
 
       <button class="action-btn" onclick="copyCustomLink()" style="margin-bottom: 10px;">
         <i class="fa-solid fa-link"></i> Copy Shareable Link
@@ -555,66 +543,44 @@
     </div>
   </div>
 
-  <!-- YouTube IFrame API Script -->
-  <script src="https://www.youtube.com/iframe_api"></script>
-
   <script>
-    let ytPlayer = null;
-    let isYTReady = false;
-    let targetVideoId = 'jfKfPfyJRdk'; // Default relaxing background track ID
-    let isPlaying = false;
+    let defaultAudioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'; // Fallback sample track
+    let currentAudioUrl = defaultAudioUrl;
 
-    // Parse YouTube ID from various link formats
-    function parseYouTubeId(url) {
-      if (!url) return null;
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    function onYouTubeIframeAPIReady() {
-      ytPlayer = new YT.Player('yt-player', {
-        height: '200',
-        width: '200',
-        videoId: targetVideoId,
-        playerVars: { 'autoplay': 0, 'controls': 0, 'enablejsapi': 1 },
-        events: {
-          'onReady': () => { isYTReady = true; updateSongTitleUI(); },
-          'onStateChange': onPlayerStateChange
-        }
-      });
-    }
-
-    function onPlayerStateChange(event) {
-      const playIcon = document.getElementById('playPauseIcon');
-      const artIcon = document.getElementById('albumArtIcon');
-      if (event.data === YT.PlayerState.PLAYING) {
-        isPlaying = true;
-        playIcon.className = 'fa-solid fa-pause';
-        artIcon.classList.add('playing');
-      } else {
-        isPlaying = false;
-        playIcon.className = 'fa-solid fa-play';
-        artIcon.classList.remove('playing');
+    // Convert standard Google Drive share links to a direct streaming/download stream link automatically
+    function convertGoogleDriveLink(url) {
+      if (!url) return '';
+      // If it contains file/d/ID/view or id=ID
+      let fileIdMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (fileIdMatch && fileIdMatch[1]) {
+        return `https://docs.google.com/uc?export=download&id=${fileIdMatch[1]}`;
       }
+      return url;
     }
+
+    const audioElement = document.getElementById('bgAudio');
+
+    // Audio Player State Handlers
+    audioElement.addEventListener('playing', () => {
+      document.getElementById('playPauseIcon').className = 'fa-solid fa-pause';
+      document.getElementById('albumArtIcon').classList.add('playing');
+    });
+
+    audioElement.addEventListener('pause', () => {
+      document.getElementById('playPauseIcon').className = 'fa-solid fa-play';
+      document.getElementById('albumArtIcon').classList.remove('playing');
+    });
+
+    audioElement.addEventListener('ended', () => {
+      document.getElementById('playPauseIcon').className = 'fa-solid fa-play';
+      document.getElementById('albumArtIcon').classList.remove('playing');
+    });
 
     function togglePlayPause() {
-      if (!isYTReady || !ytPlayer) return;
-      if (isPlaying) {
-        ytPlayer.pauseVideo();
+      if (audioElement.paused) {
+        audioElement.play().catch(e => console.log("Playback error:", e));
       } else {
-        ytPlayer.playVideo();
-      }
-    }
-
-    function updateSongTitleUI() {
-      if (isYTReady && ytPlayer && typeof ytPlayer.getVideoData === 'function') {
-        const data = ytPlayer.getVideoData();
-        if (data && data.title) {
-          document.getElementById('displaySongTitle').innerText = data.title;
-          document.getElementById('displaySongArtist').innerText = data.author || 'YouTube Music';
-        }
+        audioElement.pause();
       }
     }
 
@@ -624,7 +590,7 @@
       const name = params.get('name');
       const intro = params.get('intro');
       const letter = params.get('letter');
-      const yt = params.get('yt');
+      const audioParam = params.get('audio');
 
       if (name) {
         document.getElementById('displayName').innerText = name;
@@ -638,18 +604,16 @@
         document.getElementById('displayLetter').innerHTML = letter.replace(/\n/g, '<br>');
         document.getElementById('inputLetter').value = letter;
       }
-      if (yt) {
-        const parsed = parseYouTubeId(yt) || yt;
-        targetVideoId = parsed;
-        document.getElementById('inputYtUrl').value = `https://www.youtube.com/watch?v=${targetVideoId}`;
-        if (isYTReady) {
-          ytPlayer.loadVideoById(targetVideoId);
-          setTimeout(updateSongTitleUI, 1000);
-        }
+      if (audioParam) {
+        currentAudioUrl = decodeURIComponent(audioParam);
+        document.getElementById('inputAudioUrl').value = currentAudioUrl;
+      } else {
+        currentAudioUrl = defaultAudioUrl;
       }
+      audioElement.src = currentAudioUrl;
     });
 
-    // Envelope Open & Play Music/Confetti
+    // Envelope Open & Play Audio/Confetti
     function openEnvelope() {
       document.getElementById('envelopeScreen').classList.add('hidden');
       document.getElementById('mainContainer').style.display = 'block';
@@ -658,14 +622,13 @@
         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       }
 
-      if (isYTReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
-        ytPlayer.loadVideoById(targetVideoId);
-        ytPlayer.playVideo();
-        setTimeout(updateSongTitleUI, 1000);
-      }
+      audioElement.src = currentAudioUrl;
+      audioElement.play().catch(e => {
+        console.log("Autoplay blocked or stream issue:", e);
+      });
     }
 
-    // Section Navigation (Directly between Card and Letter)
+    // Section Navigation
     function nextSection(secNum) {
       document.querySelectorAll('.section-card').forEach(card => card.classList.remove('active'));
       document.getElementById('sec' + secNum).classList.add('active');
@@ -677,9 +640,8 @@
       document.getElementById('sec1').classList.add('active');
       document.getElementById('envelopeScreen').classList.remove('hidden');
       document.getElementById('mainContainer').style.display = 'none';
-      if (isYTReady && ytPlayer && typeof ytPlayer.stopVideo === 'function') {
-        ytPlayer.stopVideo();
-      }
+      audioElement.pause();
+      audioElement.currentTime = 0;
     }
 
     // Modal Controls
@@ -702,20 +664,18 @@
       const name = document.getElementById('inputName').value.trim();
       const intro = document.getElementById('inputIntro').value.trim();
       const letter = document.getElementById('inputLetter').value.trim();
-      const rawYt = document.getElementById('inputYtUrl').value.trim();
-      const ytId = parseYouTubeId(rawYt);
+      let rawAudio = document.getElementById('inputAudioUrl').value.trim();
+      
+      const processedAudio = convertGoogleDriveLink(rawAudio);
 
       if (name) document.getElementById('displayName').innerText = name;
       if (intro) document.getElementById('displayIntro').innerText = intro;
       if (letter) {
         document.getElementById('displayLetter').innerHTML = letter.replace(/\n/g, '<br>');
       }
-      if (ytId) {
-        targetVideoId = ytId;
-        if (isYTReady) {
-          ytPlayer.cueVideoById(targetVideoId);
-          setTimeout(updateSongTitleUI, 1000);
-        }
+      if (processedAudio) {
+        currentAudioUrl = processedAudio;
+        audioElement.src = currentAudioUrl;
       }
 
       const baseUrl = window.location.origin + window.location.pathname;
@@ -724,7 +684,9 @@
       if (name) params.push(`name=${encodeURIComponent(name)}`);
       if (intro) params.push(`intro=${encodeURIComponent(intro)}`);
       if (letter) params.push(`letter=${encodeURIComponent(letter)}`);
-      if (ytId) params.push(`yt=${encodeURIComponent(ytId)}`);
+      if (processedAudio && processedAudio !== defaultAudioUrl) {
+        params.push(`audio=${encodeURIComponent(processedAudio)}`);
+      }
       
       return url + params.join('&');
     }
