@@ -74,35 +74,62 @@
       }
     }
 
-    /* Dancing Characters (Joker & Teddy) */
+    /* Proper Multi-Movement Dance Choreography */
     .dancer {
       position: absolute;
-      bottom: 20px;
+      bottom: 25px;
       font-size: 4.5rem;
       user-select: none;
       display: none;
       z-index: 12;
-      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+      filter: drop-shadow(0 12px 20px rgba(0,0,0,0.6));
     }
 
     .dancer.left {
       left: 8%;
-      animation: danceLeft 1.2s ease-in-out infinite alternate;
+      animation: complexDanceLeft 1.4s ease-in-out infinite;
     }
 
     .dancer.right {
       right: 8%;
-      animation: danceRight 1.2s ease-in-out infinite alternate;
+      animation: complexDanceRight 1.4s ease-in-out infinite;
+      animation-delay: 0.2s; /* Slight offset for rhythm variety */
     }
 
-    @keyframes danceLeft {
-      0% { transform: translateY(0) rotate(-15deg) scale(1); }
-      100% { transform: translateY(-25px) rotate(15deg) scale(1.1); }
+    @keyframes complexDanceLeft {
+      0% {
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+      }
+      25% {
+        transform: translateY(-30px) translateX(15px) rotate(-20deg) scale(1.15);
+      }
+      50% {
+        transform: translateY(0) translateX(30px) rotate(0deg) scale(1);
+      }
+      75% {
+        transform: translateY(-25px) translateX(15px) rotate(20deg) scale(1.1);
+      }
+      100% {
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+      }
     }
 
-    @keyframes danceRight {
-      0% { transform: translateY(0) rotate(15deg) scale(1); }
-      100% { transform: translateY(-25px) rotate(-15deg) scale(1.1); }
+    @keyframes complexDanceRight {
+      0% {
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+      }
+      25% {
+        transform: translateY(-30px) translateX(-15px) rotate(20deg) scale(1.15);
+      }
+      50% {
+        transform: translateY(0) translateX(-30px) rotate(0deg) scale(1);
+      }
+      75% {
+        transform: translateY(-25px) translateX(-15px) rotate(-20deg) scale(1.1);
+      }
+      100% {
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+      }
     }
 
     /* Minimal Settings Button */
@@ -333,7 +360,6 @@
       pointer-events: none;
     }
 
-    /* Responsive adjustments for dancers on small screens */
     @media(max-width: 600px) {
       .dancer.left { left: 2%; font-size: 3.5rem; }
       .dancer.right { right: 2%; font-size: 3.5rem; }
@@ -345,7 +371,7 @@
   <div class="bg-glow"></div>
   <div id="rain-container"></div>
 
-  <!-- Dancing Characters -->
+  <!-- Dancing Characters with Choreography -->
   <div class="dancer left" id="jokerDancer">🃏</div>
   <div class="dancer right" id="teddyDancer">🧸</div>
 
@@ -365,7 +391,7 @@
       <div class="cake" id="cakeEmoji">🎂</div>
     </div>
     
-    <span class="tap-hint" id="tapHint">👇 Tap cake to play song & dance</span>
+    <span class="tap-hint" id="tapHint">👇 Tap cake to play song & start dance</span>
 
     <div class="subtitle">Happy Birthday</div>
     <h1><span class="highlight-name" id="displayName">Alex</span> 🎉</h1>
@@ -373,7 +399,7 @@
     <p class="wish" id="displayWish">Wishing you a wonderful day filled with happiness, laughter, and great memories!</p>
 
     <div class="music-status" id="musicStatus">
-      <i class="fa-solid fa-music"></i> Playing song & party mode active!
+      <i class="fa-solid fa-music"></i> Full dance & party mode active!
     </div>
   </div>
 
@@ -416,11 +442,9 @@
     const birthdayItems = ['🎈', '🎂', '🎁', '🎉', '✨', '🥳', '🧁', '⭐'];
 
     function startPartyEffects() {
-      // 1. Show and animate dancing characters
       document.getElementById('jokerDancer').style.display = 'block';
       document.getElementById('teddyDancer').style.display = 'block';
 
-      // 2. Start rain if not already running
       if (rainInterval) return;
       const rainContainer = document.getElementById('rain-container');
       
@@ -445,7 +469,6 @@
       }, 300);
     }
 
-    // Extract YouTube ID
     function parseYouTubeId(url) {
       if (!url) return null;
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -492,15 +515,12 @@
     });
 
     function onCakeClick() {
-      // Confetti burst
       if (typeof confetti === 'function') {
         confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
       }
 
-      // Trigger Dancers & Rain
       startPartyEffects();
 
-      // Play Audio
       if (targetVideoId && isYTReady && ytPlayer) {
         if (typeof ytPlayer.playVideo === 'function') {
           ytPlayer.loadVideoById(targetVideoId);
@@ -559,7 +579,7 @@
     function shareWhatsApp() {
       const link = getShareUrl();
       const name = document.getElementById('inputName').value.trim() || 'Friend';
-      const text = `🎉 Happy Birthday ${name}! View your birthday card & dancing song here:\n${link}`;
+      const text = `🎉 Happy Birthday ${name}! View your birthday card & dancing choreography here:\n${link}`;
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
       closeModal();
     }
