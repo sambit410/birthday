@@ -1,45 +1,290 @@
-// Automatically upload user's MP3 file to cloud storage in the background
-async function handleFileSelected(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+<!-- Hidden container for background YouTube audio playback -->
+<div id="ytPlayerContainer" style="position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden;"></div>
 
-  const toast = document.getElementById('toast');
-  showToast('Uploading song for WhatsApp sharing... ⏳');
+<script src="https://www.youtube.com/iframe_api"></script>
 
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
+<script>
+  // --- Audio Player State ---
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const masterGain = audioCtx.createGain();
+  masterGain.gain.value = 1.0;
+  masterGain.connect(audioCtx.destination);
 
-    // Free background upload API (no account needed, CORS friendly)
-    const response = await fetch('https://tmpfiles.org/api/v1/upload', {
-      method: 'POST',
-      body: formData
-    });
+  const customAudioPlayer = document.getElementById('customAudioPlayer');
+  let ytPlayer = null;
+  let isYTReady = false;
+  let activeAudioMode = 'synth'; // 'yt', 'mp3', or 'synth'
+  let currentAudioUrl = '';
+  let currentYtId = '';
+  let isPlaying = false;
 
-    const data = await response.json();
+  const PRESET_MUSIC = {
+    preset1: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a8e32c.mp3',
+    preset2: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_8b49e6f1f4.mp3'
+  };
 
-    if (data.status === 'success') {
-      // Convert view URL to direct streaming MP3 URL
-      const directMp3Url = data.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
-      
-      customAudioUrl = directMp3Url;
-      currentMusicSource = 'url';
-      
-      // Update UI & Local storage
-      document.getElementById('inputMusicUrl').value = directMp3Url;
-      localStorage.setItem('saved_birthday_music', directMp3Url);
-      
-      customAudioPlayer.src = directMp3Url;
-      showToast('Song ready to share! 🎵🎉');
-    } else {
-      throw new Error('Upload failed');
-    }
-  } catch (err) {
-    console.error('Auto upload error:', err);
-    // Fallback to local playback if offline or error
-    customAudioUrl = URL.createObjectURL(file);
-    customAudioPlayer.src = customAudioUrl;
-    currentMusicSource = 'localFile';
-    showToast('Loaded locally (sharing may limited) ⚠️');
+  // Helper: Extract YouTube Video ID from any pasted YouTube URL
+  function extractYouTubeId(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
   }
-}
+
+  // YouTube Iframe API Initialization
+  function onYouTubeIframeAPIReady() {
+    ytPlayer = new YT.Player('ytPlayerContainer', {
+      height: '1',
+      width: '1',
+      videoId: '',
+      playerVars: {
+        'autoplay': 0,
+        'controls': 0,
+        'loop': 1
+      },
+      events: {
+        'onReady': () => { isYTReady = true; }
+      }
+    });
+  }
+
+  function openSettingsModal() {
+    document.getElementById('settingsModal').classList.add('active');
+  }
+
+  function closeSettingsModal() {
+    document.getElementById('settingsModal').classList.remove('active');
+  }
+
+  function handleMusicOptionChange(val) {
+    const urlGroup = document.getElementById('customUrlGroup');
+    if (urlGroup) urlGroup.style.display = (val === 'customUrl') ? 'block' : 'none';
+  }
+
+  // Unified Music Playback Engine
+  async function playBirthdayMusic() {
+    // Stop all audio instances first
+    if (customAudioPlayer) customAudioPlayer.pause();
+    if (ytPlayer && isYTReady && typeof ytPlayer.stopVideo === 'function') {
+      ytPlayer.stopVideo();
+    }
+
+    if (activeAudioMode === 'yt' && currentYtId) {
+      if (ytPlayer && isYTReady) {
+        ytPlayer.loadVideoById(currentYtId);
+        ytPlayer.playVideo();
+        isPlaying = true;
+      }
+    } else if (activeAudioMode === 'mp3' && currentAudioUrl) {
+      customAudioPlayer.src = currentAudioUrl;
+      customAudioPlayer.volume = 1.0;
+      customAudioPlayer.play().then(() => {
+        isPlaying = true;
+      }).catch(() => {
+        playHappyBirthdayMelody();
+      });
+    } else {
+      playHappyBirthdayMelody();
+    }
+  }
+
+  function toggleMusicPlayback() {
+    if (isPlaying) {
+      if (activeAudioMode === 'yt' && ytPlayer) {
+        ytPlayer.pauseVideo();
+      } else {
+        customAudioPlayer.pause();
+      }
+      isPlaying = false;
+    } else {
+      playBirthdayMusic();
+    }
+  }
+
+  // Page Initialization & Parsing Shared Parameters
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    let nameParam = urlParams.get('name') || localStorage.getItem('saved_birthday_name');
+    let wishParam = urlParams.get('wish') || localStorage.getItem('saved_birthday_wish');
+    let musicParam = urlParams.get('music') || localStorage.getItem('saved_birthday_music');
+
+    if (nameParam) {
+      document.getElementById('displayName').innerText = nameParam;
+      document.getElementById('inputName').value = nameParam;
+    }
+
+    if (wishParam) {
+      document.getElementById('displayWish').innerText = wishParam;
+      document.getElementById('inputWish').value = wishParam;
+    }
+
+    if (musicParam) {
+      document.getElementById('inputMusicUrl').value = musicParam;
+      const ytId = extractYouTubeId(musicParam);
+      if (ytId) {
+        activeAudioMode = 'yt';
+        currentYtId = ytId;
+        document.getElementById('musicSelect').value = 'customUrl';
+        document.getElementById('customUrlGroup').style.display = 'block';
+      } else if (musicParam.startsWith('http')) {
+        activeAudioMode = 'mp3';
+        currentAudioUrl = musicParam;
+        document.getElementById('musicSelect').value = 'customUrl';
+        document.getElementById('customUrlGroup').style.display = 'block';
+      }
+    }
+
+    createFloatingBalloons();
+    setTimeout(triggerConfetti, 600);
+
+    // Click handler to bypass browser autoplay blocks
+    document.addEventListener('click', function startAudioOnInteraction() {
+      if (!isPlaying) {
+        playBirthdayMusic();
+      }
+      document.removeEventListener('click', startAudioOnInteraction);
+    }, { once: true });
+  });
+
+  function saveSettingsAndApply() {
+    const name = document.getElementById('inputName').value.trim() || 'Birthday Star';
+    const wish = document.getElementById('inputWish').value.trim();
+    const musicSelectVal = document.getElementById('musicSelect').value;
+    const customUrlVal = document.getElementById('inputMusicUrl').value.trim();
+
+    let musicToSave = musicSelectVal;
+
+    if (musicSelectVal === 'customUrl' && customUrlVal) {
+      musicToSave = customUrlVal;
+      const ytId = extractYouTubeId(customUrlVal);
+      if (ytId) {
+        activeAudioMode = 'yt';
+        currentYtId = ytId;
+      } else {
+        activeAudioMode = 'mp3';
+        currentAudioUrl = customUrlVal;
+      }
+    } else if (PRESET_MUSIC[musicSelectVal]) {
+      musicToSave = PRESET_MUSIC[musicSelectVal];
+      activeAudioMode = 'mp3';
+      currentAudioUrl = PRESET_MUSIC[musicSelectVal];
+    } else {
+      activeAudioMode = 'synth';
+    }
+
+    document.getElementById('displayName').innerText = name;
+    document.getElementById('displayWish').innerText = wish;
+
+    localStorage.setItem('saved_birthday_name', name);
+    localStorage.setItem('saved_birthday_wish', wish);
+    localStorage.setItem('saved_birthday_music', musicToSave);
+
+    const newUrl = `${window.location.pathname}?name=${encodeURIComponent(name)}&wish=${encodeURIComponent(wish)}&music=${encodeURIComponent(musicToSave)}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+
+    showToast('Settings Saved! 🎉');
+    closeSettingsModal();
+    playBirthdayMusic();
+  }
+
+  function shareToWhatsApp() {
+    saveSettingsAndApply();
+    const name = document.getElementById('inputName').value.trim() || 'Friend';
+    const link = window.location.href;
+    
+    const message = `🤫 Shhh... ${name}, someone sent you a secret birthday surprise!\n\nTap the link below to open your gift & blow out your candles: 👇\n${link}`;
+    
+    const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, '_blank');
+  }
+
+  // Built-in Synthesizer Fallback
+  let isPlayingMelody = false;
+  function playHappyBirthdayMelody() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (isPlayingMelody) return;
+    
+    isPlayingMelody = true;
+    isPlaying = true;
+    const tempo = 175;
+    const beat = 60 / tempo;
+    const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23, G4 = 392.00, A4 = 440.00, Bb4 = 466.16, C5 = 523.25;
+
+    const notes = [
+      [C4, 0.75], [C4, 0.25], [D4, 1], [C4, 1], [F4, 1], [E4, 2],
+      [C4, 0.75], [C4, 0.25], [D4, 1], [C4, 1], [G4, 1], [F4, 2]
+    ];
+
+    let startTime = audioCtx.currentTime;
+
+    notes.forEach(([freq, beats], index) => {
+      const duration = beats * beat;
+      const osc = audioCtx.createOscillator();
+      const noteGain = audioCtx.createGain();
+
+      osc.type = 'triangle'; 
+      osc.frequency.setValueAtTime(freq, startTime);
+
+      noteGain.gain.setValueAtTime(0.85, startTime);
+      noteGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration - 0.02);
+
+      osc.connect(noteGain);
+      noteGain.connect(masterGain);
+
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+
+      startTime += duration;
+
+      if (index === notes.length - 1) {
+        setTimeout(() => { isPlayingMelody = false; }, (startTime - audioCtx.currentTime) * 1000);
+      }
+    });
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.innerText = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  let candlesBlown = false;
+  function blowOutCandles() {
+    if (!candlesBlown) {
+      document.getElementById('cakeEmoji').innerText = '🍰';
+      document.getElementById('cakeHint').innerHTML = '✨ Make a Wish! Candles blown out! ✨';
+      playBirthdayMusic();
+      triggerConfetti();
+      candlesBlown = true;
+    } else {
+      triggerConfetti();
+      playBirthdayMusic();
+    }
+  }
+
+  function openGift() {
+    document.getElementById('giftBox').innerText = '🎁✨';
+    document.getElementById('giftMessage').style.display = 'block';
+    triggerConfetti();
+    playBirthdayMusic();
+  }
+
+  function triggerConfetti() {
+    if (typeof confetti === 'function') {
+      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+    }
+  }
+
+  function createFloatingBalloons() {
+    const container = document.getElementById('balloon-container');
+    const balloonEmojis = ['🎈', '✨', '🎉', '🌟'];
+    for (let i = 0; i < 10; i++) {
+      const balloon = document.createElement('div');
+      balloon.className = 'bg-balloon';
+      balloon.innerText = balloonEmojis[Math.floor(Math.random() * balloonEmojis.length)];
+      balloon.style.left = `${Math.random() * 90}%`;
+      balloon.style.animationDuration = `${8 + Math.random() * 8}s`;
+      container.appendChild(balloon);
+    }
+  }
+</script>
