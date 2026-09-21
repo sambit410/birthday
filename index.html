@@ -42,6 +42,31 @@
       pointer-events: none;
     }
 
+    /* Floating Settings Gear Button */
+    .settings-gear-btn {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fbcfe8;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 200;
+    }
+
+    .settings-gear-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: rotate(45deg);
+    }
+
     /* Envelope Intro Screen */
     .envelope-screen {
       position: fixed;
@@ -96,7 +121,6 @@
       border-right: 130px solid transparent;
       border-top: 100px solid #f472b6;
       transform-origin: top;
-      transition: transform 0.4s ease;
     }
 
     .envelope-seal {
@@ -183,7 +207,6 @@
       100% { transform: translateY(-10px) rotate(4deg); }
     }
 
-    /* Headings & Texts */
     .greeting {
       font-family: 'Playfair Display', serif;
       font-size: 1.8rem;
@@ -207,7 +230,6 @@
       margin-bottom: 24px;
     }
 
-    /* Buttons */
     .action-btn {
       width: 100%;
       padding: 14px;
@@ -232,8 +254,13 @@
       opacity: 0.95;
     }
 
-    /* Audio Player Widget */
-    .music-widget {
+    .action-btn.wa {
+      background: #25d366;
+      box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+    }
+
+    /* Music Widget Status */
+    .music-widget-status {
       background: rgba(0, 0, 0, 0.25);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
@@ -266,13 +293,6 @@
     .music-details span {
       font-size: 0.75rem;
       color: #94a3b8;
-    }
-
-    audio {
-      width: 100%;
-      margin-top: 12px;
-      height: 32px;
-      filter: invert(1) hue-rotate(180deg) brightness(1.5);
     }
 
     /* Photo Album Carousel */
@@ -377,11 +397,111 @@
       margin-bottom: 20px;
       box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
     }
+
+    /* Unified Settings Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 15, 23, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 300;
+    }
+
+    .modal-content {
+      background: #181824;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 28px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .close-btn:hover { color: #fff; }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      color: #94a3b8;
+      font-weight: 700;
+      text-align: left;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #e11d48;
+    }
+
+    /* Hidden YouTube API IFrame */
+    #yt-hidden-container {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      width: 200px;
+      height: 200px;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
 
   <div class="bg-glow"></div>
+
+  <!-- Hidden YouTube Player Container -->
+  <div id="yt-hidden-container">
+    <div id="yt-player"></div>
+  </div>
+
+  <!-- Settings Gear Button (Unified Menu) -->
+  <button class="settings-gear-btn" onclick="openModal()" title="Customize Experience">
+    <i class="fa-solid fa-sliders"></i>
+  </button>
 
   <!-- ENVELOPE INTRO SCREEN -->
   <div class="envelope-screen" id="envelopeScreen" onclick="openEnvelope()">
@@ -403,20 +523,16 @@
         <div class="toy girl"></div>
       </div>
       <div class="greeting">Happy Birthday</div>
-      <h1>My Special One 💖</h1>
-      <p class="message-text">Today is yours. A whole garden of wishes, for every laugh we've shared, every silly moment, and every reason you make the world brighter!</p>
+      <h1 id="displayName">My Special One 💖</h1>
+      <p class="message-text" id="displayIntro">Today is yours. A whole garden of wishes, for every laugh we've shared, every silly moment, and every reason you make the world brighter!</p>
       
-      <div class="music-widget">
+      <div class="music-widget-status">
         <div class="music-icon"><i class="fa-solid fa-music"></i></div>
         <div class="music-details">
-          <strong>Dedicated Special Song</strong>
-          <span>Tap play for your vibe</span>
+          <strong id="displaySongTitle">YouTube Music Vibe</strong>
+          <span>Syncs automatically on open</span>
         </div>
       </div>
-      <audio id="bgAudio" controls>
-        <source src="https://actions.google.com/sounds/v1/ambiences/birthday_party.ogg" type="audio/ogg">
-        Your browser does not support audio.
-      </audio>
 
       <button class="action-btn" onclick="nextSection(2)">See Cool Album <i class="fa-solid fa-arrow-right"></i></button>
     </div>
@@ -470,18 +586,104 @@
       <div class="greeting">A Letter Just For You</div>
       <h1>My Heartfelt Note 💌</h1>
       
-      <div class="letter-box">
+      <div class="letter-box" id="displayLetter">
         There’s no card big enough for everything I’d like to say. Thank you for the small and unseen things — the way you check in, the jokes only we get, the quiet patience when I’m being too much. I noticed, and I love you for it.<br><br>
         I hope today feels celebrated. Most of all, I hope this year ahead feels — for one whole trip around the sun — exactly the way you've always made me feel: completely, completely loved.
       </div>
 
-      <button class="action-btn" onclick="restartExperience()"><i class="fa-solid fa-rotate-right"></i> Play Again</button>
+      <button class="action-btn" onclick="restartExperience()" style="margin-bottom: 10px;"><i class="fa-solid fa-rotate-right"></i> Play Again</button>
+      <button class="action-btn" onclick="openModal()"><i class="fa-solid fa-sliders"></i> Customize Everything</button>
     </div>
 
   </div>
 
+  <!-- UNIFIED CUSTOMIZATION MODAL -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Customize Card & Music</h3>
+        <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <label for="inputName">Card Title / Recipient Name</label>
+      <input type="text" id="inputName" placeholder="My Special One 💖">
+
+      <label for="inputIntro">Intro Greeting Message</label>
+      <textarea id="inputIntro" rows="2" placeholder="Write main intro text..."></textarea>
+
+      <label for="inputLetter">Secret Letter Message</label>
+      <textarea id="inputLetter" rows="4" placeholder="Write your heartfelt letter..."></textarea>
+
+      <label for="inputYtUrl">YouTube Music Link</label>
+      <input type="url" id="inputYtUrl" placeholder="https://www.youtube.com/watch?v=...">
+
+      <button class="action-btn" onclick="copyCustomLink()" style="margin-bottom: 10px;">
+        <i class="fa-solid fa-link"></i> Copy Shareable Link
+      </button>
+
+      <button class="action-btn wa" onclick="shareWhatsApp()">
+        <i class="fa-brands fa-whatsapp"></i> Share via WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <!-- YouTube IFrame API Script -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
   <script>
-    // Envelope Open & Confetti Trigger
+    let ytPlayer = null;
+    let isYTReady = false;
+    let targetVideoId = 'jfKfPfyJRdk'; // Default relaxing background track ID
+
+    // Parse YouTube ID from various link formats
+    function parseYouTubeId(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    function onYouTubeIframeAPIReady() {
+      ytPlayer = new YT.Player('yt-player', {
+        height: '200',
+        width: '200',
+        videoId: targetVideoId,
+        playerVars: { 'autoplay': 0, 'controls': 0, 'enablejsapi': 1 },
+        events: {
+          'onReady': () => { isYTReady = true; }
+        }
+      });
+    }
+
+    // Load custom parameters from URL on load
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const name = params.get('name');
+      const intro = params.get('intro');
+      const letter = params.get('letter');
+      const yt = params.get('yt');
+
+      if (name) {
+        document.getElementById('displayName').innerText = name;
+        document.getElementById('inputName').value = name;
+      }
+      if (intro) {
+        document.getElementById('displayIntro').innerText = intro;
+        document.getElementById('inputIntro').value = intro;
+      }
+      if (letter) {
+        document.getElementById('displayLetter').innerHTML = letter.replace(/\n/g, '<br>');
+        document.getElementById('inputLetter').value = letter;
+      }
+      if (yt) {
+        const parsed = parseYouTubeId(yt) || yt;
+        targetVideoId = parsed;
+        document.getElementById('inputYtUrl').value = `https://www.youtube.com/watch?v=${targetVideoId}`;
+        if (isYTReady) ytPlayer.cueVideoById(targetVideoId);
+      }
+    });
+
+    // Envelope Open & Play Music/Confetti
     function openEnvelope() {
       document.getElementById('envelopeScreen').classList.add('hidden');
       document.getElementById('mainContainer').style.display = 'block';
@@ -490,11 +692,13 @@
         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       }
 
-      const audio = document.getElementById('bgAudio');
-      audio.play().catch(e => console.log("Audio autoplay restricted:", e));
+      if (isYTReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+        ytPlayer.loadVideoById(targetVideoId);
+        ytPlayer.playVideo();
+      }
     }
 
-    // Section Navigation Handler
+    // Section Navigation
     function nextSection(secNum) {
       document.querySelectorAll('.section-card').forEach(card => card.classList.remove('active'));
       document.getElementById('sec' + secNum).classList.add('active');
@@ -506,9 +710,12 @@
       document.getElementById('sec1').classList.add('active');
       document.getElementById('envelopeScreen').classList.remove('hidden');
       document.getElementById('mainContainer').style.display = 'none';
+      if (isYTReady && ytPlayer && typeof ytPlayer.stopVideo === 'function') {
+        ytPlayer.stopVideo();
+      }
     }
 
-    // Photo Album Data & Logic
+    // Photo Album Carousel
     const albumData = [
       { emoji: '🧸', caption: '"The way you smile in every photo — I hope you know it lights up the room."' },
       { emoji: '🧁', caption: '"Ordinary days with you have always been my favourite ones."' },
@@ -531,7 +738,7 @@
       updatePhoto();
     }
 
-    // Flower Wishes Data
+    // Flower Wishes
     const wishes = {
       1: '"Your laugh is one of those sounds that just makes a room feel warmer. Wishing you a year full of all the kind of memories that bring it out again and again."',
       2: '"May you remember the small things — a worry from a Tuesday, the random text on a hard day. It always feels like being seen, not just heard, wishing you the same softness back."',
@@ -540,6 +747,68 @@
 
     function revealWish(id) {
       document.getElementById('wishDisplay').innerText = wishes[id];
+    }
+
+    // Modal Controls
+    function openModal() {
+      document.getElementById('settingsModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+
+    window.onclick = function(e) {
+      if (e.target === document.getElementById('settingsModal')) {
+        closeModal();
+      }
+    };
+
+    // Generate Shareable Link
+    function getShareUrl() {
+      const name = document.getElementById('inputName').value.trim();
+      const intro = document.getElementById('inputIntro').value.trim();
+      const letter = document.getElementById('inputLetter').value.trim();
+      const rawYt = document.getElementById('inputYtUrl').value.trim();
+      const ytId = parseYouTubeId(rawYt);
+
+      if (name) document.getElementById('displayName').innerText = name;
+      if (intro) document.getElementById('displayIntro').innerText = intro;
+      if (letter) {
+        document.getElementById('displayLetter').innerHTML = letter.replace(/\n/g, '<br>');
+      }
+      if (ytId) {
+        targetVideoId = ytId;
+        if (isYTReady) ytPlayer.cueVideoById(targetVideoId);
+      }
+
+      const baseUrl = window.location.origin + window.location.pathname;
+      let url = `${baseUrl}?`;
+      const params = [];
+      if (name) params.push(`name=${encodeURIComponent(name)}`);
+      if (intro) params.push(`intro=${encodeURIComponent(intro)}`);
+      if (letter) params.push(`letter=${encodeURIComponent(letter)}`);
+      if (ytId) params.push(`yt=${encodeURIComponent(ytId)}`);
+      
+      return url + params.join('&');
+    }
+
+    function copyCustomLink() {
+      const link = getShareUrl();
+      navigator.clipboard.writeText(link).then(() => {
+        alert('Custom link copied successfully! Send it to your special person.');
+        closeModal();
+      }).catch(() => {
+        prompt('Copy your link:', link);
+      });
+    }
+
+    function shareWhatsApp() {
+      const link = getShareUrl();
+      const name = document.getElementById('inputName').value.trim() || 'My Special One';
+      const text = `🎉 Happy Birthday ${name}! Open your interactive digital card & song here:\n${link}`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+      closeModal();
     }
   </script>
 </body>
