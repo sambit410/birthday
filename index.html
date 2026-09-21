@@ -432,7 +432,7 @@
       border-color: #e11d48;
     }
 
-    /* Important Guide Box for User */
+    /* Catbox Guide Box */
     .guide-box {
       background: rgba(225, 29, 72, 0.08);
       border: 1px solid rgba(225, 29, 72, 0.25);
@@ -459,7 +459,7 @@
     }
 
     .guide-box li {
-      margin-bottom: 6px;
+      margin-bottom: 5px;
     }
 
     .guide-box a {
@@ -541,13 +541,14 @@
         <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <!-- MUST-READ USER GUIDE FOR MUSIC -->
+      <!-- CATBOX USER GUIDE -->
       <div class="guide-box">
-        <h4><i class="fa-solid fa-circle-info"></i> How to Add Custom Music (No Signup):</h4>
+        <h4><i class="fa-solid fa-circle-info"></i> How to Add Your MP3 Song:</h4>
         <ol>
-          <li><b>Option A:</b> Go to <a href="https://catbox.moe" target="_blank">Catbox.moe</a>, upload your MP3 file, and copy the direct link.</li>
-          <li><b>Option B (Backup):</b> Go to <a href="https://videotourl.com/tools/mp3-to-url" target="_blank">VideoToURL MP3 Tool</a>, drop your song, and copy the link.</li>
-          <li>Paste your direct link ending in <b>.mp3</b> into the box below and click share!</li>
+          <li>Go to <a href="https://catbox.moe" target="_blank">Catbox.moe</a> on your browser.</li>
+          <li>Select your `.mp3` audio file and click <b>Upload</b>.</li>
+          <li>Copy the generated direct file link ending in <b>.mp3</b>.</li>
+          <li>Paste that link into the box below and share your card!</li>
         </ol>
       </div>
 
@@ -560,7 +561,7 @@
       <label for="inputLetter">Secret Letter Message</label>
       <textarea id="inputLetter" rows="4" placeholder="Write your heartfelt letter..."></textarea>
 
-      <label for="inputAudioUrl">Direct MP3 File Link</label>
+      <label for="inputAudioUrl">Direct MP3 File Link (.mp3)</label>
       <input type="url" id="inputAudioUrl" placeholder="https://files.catbox.moe/xxxxxx.mp3">
 
       <button class="action-btn" onclick="copyCustomLink()" style="margin-bottom: 10px;">
@@ -625,7 +626,6 @@
         currentAudioUrl = decodeURIComponent(audioParam);
         document.getElementById('inputAudioUrl').value = currentAudioUrl;
         
-        // Extract clean file name for title display
         try {
           const urlObj = new URL(currentAudioUrl);
           let filename = urlObj.pathname.split('/').pop();
