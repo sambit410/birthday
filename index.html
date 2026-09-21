@@ -366,38 +366,32 @@
       margin-bottom: 20px;
     }
 
-    /* Visible YouTube Mini Player Wrapper */
-    .player-section {
+    /* Built-in Audio Controller Bar */
+    .audio-player-box {
       background: rgba(0, 0, 0, 0.25);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       padding: 12px;
       display: flex;
-      align-items: center;
-      gap: 12px;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    #yt-player {
-      width: 100px;
-      height: 60px;
-      border-radius: 8px;
-      overflow: hidden;
-      flex-shrink: 0;
-      background: #000;
-    }
-
-    .player-info {
-      text-align: left;
+    .audio-info {
       font-size: 0.8rem;
-      color: #cbd5e1;
-      overflow: hidden;
+      color: #10b981;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
-    .player-info strong {
-      display: block;
-      color: #fff;
-      font-size: 0.85rem;
-      margin-bottom: 2px;
+    audio {
+      width: 100%;
+      height: 36px;
+      outline: none;
+      filter: invert(1) hue-rotate(180deg) brightness(1.5);
     }
 
     /* Minimal Modal Styling */
@@ -561,13 +555,16 @@
     
     <p class="wish" id="displayWish">Wishing you a wonderful day filled with happiness, laughter, and great memories!</p>
 
-    <!-- Visible Mini Player Box -->
-    <div class="player-section">
-      <div id="yt-player"></div>
-      <div class="player-info">
-        <strong>Birthday Track</strong>
-        <span id="playerStatusText">Tap cake to play audio</span>
+    <!-- Direct HTML5 Audio Player Box -->
+    <div class="audio-player-box">
+      <div class="audio-info" id="audioStatusText">
+        <i class="fa-solid fa-music"></i> Ready to play
       </div>
+      <!-- Default upbeat public domain celebratory track audio source -->
+      <audio id="birthdayAudio" controls>
+        <source src="https://actions.google.com/sounds/v1/ambiences/birthday_party.ogg" type="audio/ogg">
+        Your browser does not support the audio element.
+      </audio>
     </div>
   </div>
 
@@ -585,8 +582,8 @@
       <label for="inputWish">Message</label>
       <textarea id="inputWish" rows="2" placeholder="Enter custom message"></textarea>
 
-      <label for="inputYtUrl">YouTube Music Link</label>
-      <input type="url" id="inputYtUrl" placeholder="https://www.youtube.com/watch?v=...">
+      <label for="inputAudioUrl">Audio / MP3 Link</label>
+      <input type="url" id="inputAudioUrl" placeholder="Direct link to audio file (.mp3/.ogg)">
 
       <button class="btn" onclick="copyCustomLink()">
         <i class="fa-solid fa-link"></i> Copy Share Link
@@ -598,15 +595,8 @@
     </div>
   </div>
 
-  <!-- YouTube IFrame API -->
-  <script src="https://www.youtube.com/iframe_api"></script>
-
   <script>
-    let ytPlayer = null;
-    let isYTReady = false;
-    let targetVideoId = 'kJQP7kiw5Fk'; // Default upbeat celebratory track if none provided
     let rainInterval = null;
-
     const birthdayItems = ['🎈', '🎂', '🎁', '🎉', '✨', '🥳', '🧁', '⭐'];
 
     function startPartyEffects() {
@@ -638,38 +628,11 @@
       }, 300);
     }
 
-    function parseYouTubeId(url) {
-      if (!url) return null;
-      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-      const match = url.match(regExp);
-      return (match && match[2].length === 11) ? match[2] : null;
-    }
-
-    function onYouTubeIframeAPIReady() {
-      ytPlayer = new YT.Player('yt-player', {
-        height: '60',
-        width: '100',
-        videoId: targetVideoId,
-        playerVars: { 'autoplay': 0, 'controls': 1, 'enablejsapi': 1, 'modestbranding': 1 },
-        events: {
-          'onReady': (e) => {
-            isYTReady = true;
-            e.target.setVolume(100);
-          },
-          'onStateChange': (e) => {
-            if (e.data === YT.PlayerState.PLAYING) {
-              document.getElementById('playerStatusText').innerText = '🎵 Playing audio & dancing!';
-            }
-          }
-        }
-      });
-    }
-
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const name = params.get('name') || 'Alex';
       const wish = params.get('wish') || 'Wishing you a wonderful day filled with happiness, laughter, and great memories!';
-      const yt = params.get('yt');
+      const audioUrl = params.get('audio');
 
       document.getElementById('displayName').innerText = name;
       document.getElementById('displayWish').innerText = wish;
@@ -677,11 +640,10 @@
       document.getElementById('inputName').value = name;
       document.getElementById('inputWish').value = wish;
 
-      if (yt) {
-        targetVideoId = parseYouTubeId(yt) || yt;
-        document.getElementById('inputYtUrl').value = `https://www.youtube.com/watch?v=${targetVideoId}`;
-      } else {
-        document.getElementById('inputYtUrl').value = `https://www.youtube.com/watch?v=${targetVideoId}`;
+      if (audioUrl) {
+        const audioEl = document.getElementById('birthdayAudio');
+        audioEl.src = audioUrl;
+        document.getElementById('inputAudioUrl').value = audioUrl;
       }
     });
 
@@ -692,13 +654,13 @@
 
       startPartyEffects();
 
-      if (isYTReady && ytPlayer) {
-        if (typeof ytPlayer.playVideo === 'function') {
-          ytPlayer.loadVideoById(targetVideoId);
-          ytPlayer.playVideo();
-          document.getElementById('tapHint').style.display = 'none';
-        }
-      }
+      const audioEl = document.getElementById('birthdayAudio');
+      audioEl.play().then(() => {
+        document.getElementById('tapHint').style.display = 'none';
+        document.getElementById('audioStatusText').innerHTML = '<i class="fa-solid fa-volume-high"></i> Playing party music & dancing!';
+      }).catch(err => {
+        console.log("Audio play blocked/errored:", err);
+      });
     }
 
     function openModal() {
@@ -718,17 +680,15 @@
     function getShareUrl() {
       const name = document.getElementById('inputName').value.trim() || 'Friend';
       const wish = document.getElementById('inputWish').value.trim() || 'Happy Birthday!';
-      const rawYtUrl = document.getElementById('inputYtUrl').value.trim();
-      const ytId = parseYouTubeId(rawYtUrl) || targetVideoId;
+      const audioUrl = document.getElementById('inputAudioUrl').value.trim();
 
       document.getElementById('displayName').innerText = name;
       document.getElementById('displayWish').innerText = wish;
 
       const baseUrl = window.location.origin + window.location.pathname;
       let url = `${baseUrl}?name=${encodeURIComponent(name)}&wish=${encodeURIComponent(wish)}`;
-      if (ytId) {
-        url += `&yt=${encodeURIComponent(ytId)}`;
-        targetVideoId = ytId;
+      if (audioUrl) {
+        url += `&audio=${encodeURIComponent(audioUrl)}`;
       }
       return url;
     }
