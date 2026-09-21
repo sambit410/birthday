@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Happy Birthday! 🎉</title>
 
-  <!-- Confetti and Icons -->
+  <!-- Confetti, Icons & Fonts -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
@@ -43,7 +43,7 @@
       pointer-events: none;
     }
 
-    /* Minimal Gear Button */
+    /* Minimal Settings Button */
     .settings-gear-btn {
       position: absolute;
       top: 24px;
@@ -88,7 +88,7 @@
     /* Floating Cake Emoji */
     .cake-wrapper {
       display: inline-block;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       cursor: pointer;
       animation: float 4s ease-in-out infinite;
     }
@@ -106,6 +106,16 @@
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-10px); }
+    }
+
+    .tap-hint {
+      display: block;
+      font-size: 0.75rem;
+      color: #ff3366;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
     }
 
     .subtitle {
@@ -137,6 +147,15 @@
       line-height: 1.6;
       color: #94a3b8;
       font-weight: 400;
+    }
+
+    /* Audio Playing Indicator */
+    .music-status {
+      display: none;
+      font-size: 0.8rem;
+      color: #10b981;
+      font-weight: 600;
+      margin-top: 16px;
     }
 
     /* Minimal Modal Styling */
@@ -241,11 +260,26 @@
     }
 
     .btn:hover { opacity: 0.9; }
+
+    /* Hidden YouTube Player (Required for audio execution on mobile) */
+    #yt-hidden-container {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      width: 200px;
+      height: 200px;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
 
   <div class="bg-glow"></div>
+
+  <!-- Offscreen YouTube Player Container -->
+  <div id="yt-hidden-container">
+    <div id="yt-player"></div>
+  </div>
 
   <!-- Minimal Settings Button -->
   <button class="settings-gear-btn" onclick="openModal()" title="Settings">
@@ -254,14 +288,20 @@
 
   <!-- Card Display -->
   <div class="card">
-    <div class="cake-wrapper" onclick="triggerConfetti()">
-      <div class="cake">🎂</div>
+    <div class="cake-wrapper" onclick="onCakeClick()">
+      <div class="cake" id="cakeEmoji">🎂</div>
     </div>
     
+    <span class="tap-hint" id="tapHint">👇 Tap cake to play song</span>
+
     <div class="subtitle">Happy Birthday</div>
     <h1><span class="highlight-name" id="displayName">Alex</span> 🎉</h1>
     
     <p class="wish" id="displayWish">Wishing you a wonderful day filled with happiness, laughter, and great memories!</p>
+
+    <div class="music-status" id="musicStatus">
+      <i class="fa-solid fa-music"></i> Playing song...
+    </div>
   </div>
 
   <!-- Settings Modal -->
@@ -276,31 +316,102 @@
       <input type="text" id="inputName" placeholder="Enter name">
 
       <label for="inputWish">Message</label>
-      <textarea id="inputWish" rows="3" placeholder="Enter custom message"></textarea>
+      <textarea id="inputWish" rows="2" placeholder="Enter custom message"></textarea>
+
+      <label for="inputYtUrl">YouTube Music Link</label>
+      <input type="url" id="inputYtUrl" placeholder="https://www.youtube.com/watch?v=...">
 
       <button class="btn" onclick="copyCustomLink()">
-        <i class="fa-solid fa-link"></i> Copy Link
+        <i class="fa-solid fa-link"></i> Copy Share Link
       </button>
 
       <button class="btn wa" onclick="shareWhatsApp()">
-        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+        <i class="fa-brands fa-whatsapp"></i> Share on WhatsApp
       </button>
     </div>
   </div>
 
+  <!-- YouTube IFrame API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+
   <script>
-    // Read URL params on start
+    let ytPlayer = null;
+    let isYTReady = false;
+    let targetVideoId = '';
+
+    // Extract 11-character video ID from YouTube links
+    function parseYouTubeId(url) {
+      if (!url) return null;
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    // Called automatically when YouTube API loads
+    function onYouTubeIframeAPIReady() {
+      ytPlayer = new YT.Player('yt-player', {
+        height: '200',
+        width: '200',
+        videoId: '',
+        playerVars: {
+          'autoplay': 0,
+          'controls': 0,
+          'disablekb': 1,
+          'enablejsapi': 1
+        },
+        events: {
+          'onReady': () => {
+            isYTReady = true;
+            if (targetVideoId) {
+              ytPlayer.cueVideoById(targetVideoId);
+            }
+          },
+          'onError': () => {
+            console.warn("YouTube embedding restricted for this video.");
+          }
+        }
+      });
+    }
+
+    // Read URL parameters on startup
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const name = params.get('name') || 'Alex';
       const wish = params.get('wish') || 'Wishing you a wonderful day filled with happiness, laughter, and great memories!';
+      const yt = params.get('yt');
 
       document.getElementById('displayName').innerText = name;
       document.getElementById('displayWish').innerText = wish;
 
       document.getElementById('inputName').value = name;
       document.getElementById('inputWish').value = wish;
+
+      if (yt) {
+        targetVideoId = parseYouTubeId(yt) || yt;
+        document.getElementById('inputYtUrl').value = `https://www.youtube.com/watch?v=${targetVideoId}`;
+      }
     });
+
+    // Handle Cake Click
+    function onCakeClick() {
+      // 1. Pop Confetti
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+      }
+
+      // 2. Play YouTube Audio
+      if (targetVideoId && isYTReady && ytPlayer) {
+        if (typeof ytPlayer.playVideo === 'function') {
+          ytPlayer.loadVideoById(targetVideoId);
+          ytPlayer.playVideo();
+          document.getElementById('musicStatus').style.display = 'block';
+          document.getElementById('tapHint').style.display = 'none';
+        }
+      } else if (!targetVideoId) {
+        alert("No YouTube song configured! Click the gear icon (⚙️) to set a song.");
+        openModal();
+      }
+    }
 
     function openModal() {
       document.getElementById('settingsModal').style.display = 'flex';
@@ -316,21 +427,29 @@
       }
     };
 
+    // Build the shareable URL
     function getShareUrl() {
       const name = document.getElementById('inputName').value.trim() || 'Friend';
       const wish = document.getElementById('inputWish').value.trim() || 'Happy Birthday!';
+      const rawYtUrl = document.getElementById('inputYtUrl').value.trim();
+      const ytId = parseYouTubeId(rawYtUrl);
 
       document.getElementById('displayName').innerText = name;
       document.getElementById('displayWish').innerText = wish;
 
       const baseUrl = window.location.origin + window.location.pathname;
-      return `${baseUrl}?name=${encodeURIComponent(name)}&wish=${encodeURIComponent(wish)}`;
+      let url = `${baseUrl}?name=${encodeURIComponent(name)}&wish=${encodeURIComponent(wish)}`;
+      if (ytId) {
+        url += `&yt=${encodeURIComponent(ytId)}`;
+        targetVideoId = ytId;
+      }
+      return url;
     }
 
     function copyCustomLink() {
       const link = getShareUrl();
       navigator.clipboard.writeText(link).then(() => {
-        alert('Copied link to clipboard!');
+        alert('Custom link copied! Send it to the birthday person.');
         closeModal();
       }).catch(() => {
         prompt('Copy this link:', link);
@@ -340,19 +459,9 @@
     function shareWhatsApp() {
       const link = getShareUrl();
       const name = document.getElementById('inputName').value.trim() || 'Friend';
-      const text = `🎉 Happy Birthday ${name}! View your card here:\n${link}`;
+      const text = `🎉 Happy Birthday ${name}! View your birthday card & song here:\n${link}`;
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
       closeModal();
-    }
-
-    function triggerConfetti() {
-      if (typeof confetti === 'function') {
-        confetti({
-          particleCount: 70,
-          spread: 60,
-          origin: { y: 0.6 }
-        });
-      }
     }
   </script>
 </body>
