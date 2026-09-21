@@ -294,7 +294,7 @@
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 28px;
-      padding: 48px 32px;
+      padding: 40px 28px;
       max-width: 420px;
       width: 100%;
       text-align: center;
@@ -304,13 +304,13 @@
     /* Floating Cake Emoji */
     .cake-wrapper {
       display: inline-block;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       cursor: pointer;
       animation: float 4s ease-in-out infinite;
     }
 
     .cake {
-      font-size: 5rem;
+      font-size: 4.5rem;
       user-select: none;
       transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
@@ -331,7 +331,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .subtitle {
@@ -340,15 +340,15 @@
       font-size: 0.75rem;
       font-weight: 800;
       color: #ff3366;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     h1 {
-      font-size: 2.2rem;
+      font-size: 2rem;
       font-weight: 800;
       letter-spacing: -0.5px;
       color: #ffffff;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       line-height: 1.2;
     }
 
@@ -359,19 +359,45 @@
     }
 
     .wish {
-      font-size: 0.98rem;
-      line-height: 1.6;
+      font-size: 0.9rem;
+      line-height: 1.5;
       color: #94a3b8;
       font-weight: 400;
+      margin-bottom: 20px;
     }
 
-    /* Audio Playing Indicator */
-    .music-status {
-      display: none;
+    /* Visible YouTube Mini Player Wrapper */
+    .player-section {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #yt-player {
+      width: 100px;
+      height: 60px;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: #000;
+    }
+
+    .player-info {
+      text-align: left;
       font-size: 0.8rem;
-      color: #10b981;
-      font-weight: 600;
-      margin-top: 16px;
+      color: #cbd5e1;
+      overflow: hidden;
+    }
+
+    .player-info strong {
+      display: block;
+      color: #fff;
+      font-size: 0.85rem;
+      margin-bottom: 2px;
     }
 
     /* Minimal Modal Styling */
@@ -476,16 +502,6 @@
     }
 
     .btn:hover { opacity: 0.9; }
-
-    /* Hidden YouTube Player */
-    #yt-hidden-container {
-      position: absolute;
-      top: -9999px;
-      left: -9999px;
-      width: 200px;
-      height: 200px;
-      pointer-events: none;
-    }
   </style>
 </head>
 <body>
@@ -527,11 +543,6 @@
     <div class="toy-leg right-leg"></div>
   </div>
 
-  <!-- Offscreen YouTube Player Container -->
-  <div id="yt-hidden-container">
-    <div id="yt-player"></div>
-  </div>
-
   <!-- Minimal Settings Button -->
   <button class="settings-gear-btn" onclick="openModal()" title="Settings">
     <i class="fa-solid fa-sliders"></i>
@@ -543,15 +554,20 @@
       <div class="cake" id="cakeEmoji">🎂</div>
     </div>
     
-    <span class="tap-hint" id="tapHint">👇 Tap cake to play song & start toy dance</span>
+    <span class="tap-hint" id="tapHint">👇 Tap cake to start music & toy dance</span>
 
     <div class="subtitle">Happy Birthday</div>
     <h1><span class="highlight-name" id="displayName">Alex</span> 🎉</h1>
     
     <p class="wish" id="displayWish">Wishing you a wonderful day filled with happiness, laughter, and great memories!</p>
 
-    <div class="music-status" id="musicStatus">
-      <i class="fa-solid fa-music"></i> Toy party & music active!
+    <!-- Visible Mini Player Box -->
+    <div class="player-section">
+      <div id="yt-player"></div>
+      <div class="player-info">
+        <strong>Birthday Track</strong>
+        <span id="playerStatusText">Tap cake to play audio</span>
+      </div>
     </div>
   </div>
 
@@ -588,7 +604,7 @@
   <script>
     let ytPlayer = null;
     let isYTReady = false;
-    let targetVideoId = '';
+    let targetVideoId = 'kJQP7kiw5Fk'; // Default upbeat celebratory track if none provided
     let rainInterval = null;
 
     const birthdayItems = ['🎈', '🎂', '🎁', '🎉', '✨', '🥳', '🧁', '⭐'];
@@ -631,19 +647,19 @@
 
     function onYouTubeIframeAPIReady() {
       ytPlayer = new YT.Player('yt-player', {
-        height: '200',
-        width: '200',
-        videoId: '',
-        playerVars: { 'autoplay': 0, 'controls': 0, 'disablekb': 1, 'enablejsapi': 1 },
+        height: '60',
+        width: '100',
+        videoId: targetVideoId,
+        playerVars: { 'autoplay': 0, 'controls': 1, 'enablejsapi': 1, 'modestbranding': 1 },
         events: {
-          'onReady': () => {
+          'onReady': (e) => {
             isYTReady = true;
-            if (targetVideoId) {
-              ytPlayer.cueVideoById(targetVideoId);
-            }
+            e.target.setVolume(100);
           },
-          'onError': () => {
-            console.warn("YouTube embedding restricted for this video.");
+          'onStateChange': (e) => {
+            if (e.data === YT.PlayerState.PLAYING) {
+              document.getElementById('playerStatusText').innerText = '🎵 Playing audio & dancing!';
+            }
           }
         }
       });
@@ -664,6 +680,8 @@
       if (yt) {
         targetVideoId = parseYouTubeId(yt) || yt;
         document.getElementById('inputYtUrl').value = `https://www.youtube.com/watch?v=${targetVideoId}`;
+      } else {
+        document.getElementById('inputYtUrl').value = `https://www.youtube.com/watch?v=${targetVideoId}`;
       }
     });
 
@@ -674,16 +692,12 @@
 
       startPartyEffects();
 
-      if (targetVideoId && isYTReady && ytPlayer) {
+      if (isYTReady && ytPlayer) {
         if (typeof ytPlayer.playVideo === 'function') {
           ytPlayer.loadVideoById(targetVideoId);
           ytPlayer.playVideo();
-          document.getElementById('musicStatus').style.display = 'block';
           document.getElementById('tapHint').style.display = 'none';
         }
-      } else if (!targetVideoId) {
-        alert("No YouTube song configured! Click the gear icon (⚙️) to set a song.");
-        openModal();
       }
     }
 
@@ -705,7 +719,7 @@
       const name = document.getElementById('inputName').value.trim() || 'Friend';
       const wish = document.getElementById('inputWish').value.trim() || 'Happy Birthday!';
       const rawYtUrl = document.getElementById('inputYtUrl').value.trim();
-      const ytId = parseYouTubeId(rawYtUrl);
+      const ytId = parseYouTubeId(rawYtUrl) || targetVideoId;
 
       document.getElementById('displayName').innerText = name;
       document.getElementById('displayWish').innerText = wish;
