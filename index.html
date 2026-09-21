@@ -33,11 +33,15 @@
       padding: 0;
     }
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31103f 100%);
+    html, body {
+      background-color: #0f172a;
       color: #ffffff;
       min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31103f 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -490,16 +494,41 @@
   <script src="https://www.youtube.com/iframe_api"></script>
 
   <script>
-    // --- Audio Player & Synthesizer Setup ---
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const masterGain = audioCtx.createGain();
-    masterGain.gain.value = 1.0;
-    masterGain.connect(audioCtx.destination);
+    // --- Defensive Storage & Audio Utility ---
+    function safeGetStorage(key) {
+      try { return localStorage.getItem(key); } catch (e) { return null; }
+    }
+
+    function safeSetStorage(key, val) {
+      try { localStorage.setItem(key, val); } catch (e) {}
+    }
+
+    let audioCtx = null;
+    let masterGain = null;
+
+    function initAudioContext() {
+      if (!audioCtx) {
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            audioCtx = new AudioContextClass();
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = 1.0;
+            masterGain.connect(audioCtx.destination);
+          }
+        } catch (e) {
+          console.warn("Web Audio API not supported or blocked");
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
 
     const customAudioPlayer = document.getElementById('customAudioPlayer');
     let ytPlayer = null;
     let isYTReady = false;
-    let activeAudioMode = 'synth'; // 'yt', 'mp3', or 'synth'
+    let activeAudioMode = 'synth'; 
     let currentAudioUrl = '';
     let currentYtId = '';
     let isPlaying = false;
@@ -509,28 +538,23 @@
       preset2: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_8b49e6f1f4.mp3'
     };
 
-    // Helper: Extract YouTube Video ID from any pasted YouTube URL
     function extractYouTubeId(url) {
+      if (!url || typeof url !== 'string') return null;
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
       const match = url.match(regExp);
       return (match && match[2].length === 11) ? match[2] : null;
     }
 
-    // YouTube Iframe API Initialization
     function onYouTubeIframeAPIReady() {
-      ytPlayer = new YT.Player('ytPlayerContainer', {
-        height: '1',
-        width: '1',
-        videoId: '',
-        playerVars: {
-          'autoplay': 0,
-          'controls': 0,
-          'loop': 1
-        },
-        events: {
-          'onReady': () => { isYTReady = true; }
-        }
-      });
+      try {
+        ytPlayer = new YT.Player('ytPlayerContainer', {
+          height: '1',
+          width: '1',
+          videoId: '',
+          playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1 },
+          events: { 'onReady': () => { isYTReady = true; } }
+        });
+      } catch (e) {}
     }
 
     function openSettingsModal() {
@@ -552,19 +576,21 @@
       }
     }
 
-    // Unified Music Playback Engine
     async function playBirthdayMusic() {
-      // Stop all active audio streams first
+      initAudioContext();
+
       if (customAudioPlayer) customAudioPlayer.pause();
       if (ytPlayer && isYTReady && typeof ytPlayer.stopVideo === 'function') {
-        ytPlayer.stopVideo();
+        try { ytPlayer.stopVideo(); } catch (e) {}
       }
 
       if (activeAudioMode === 'yt' && currentYtId) {
-        if (ytPlayer && isYTReady) {
+        if (ytPlayer && isYTReady && typeof ytPlayer.loadVideoById === 'function') {
           ytPlayer.loadVideoById(currentYtId);
           ytPlayer.playVideo();
           isPlaying = true;
+        } else {
+          playHappyBirthdayMelody();
         }
       } else if (activeAudioMode === 'mp3' && currentAudioUrl) {
         customAudioPlayer.src = currentAudioUrl;
@@ -582,8 +608,8 @@
     function toggleMusicPlayback() {
       if (isPlaying) {
         if (activeAudioMode === 'yt' && ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
-          ytPlayer.pauseVideo();
-        } else {
+          try { ytPlayer.pauseVideo(); } catch (e) {}
+        } else if (customAudioPlayer) {
           customAudioPlayer.pause();
         }
         isPlaying = false;
@@ -592,12 +618,11 @@
       }
     }
 
-    // Initialization & Link Parameter Parsing
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
-      let nameParam = urlParams.get('name') || localStorage.getItem('saved_birthday_name');
-      let wishParam = urlParams.get('wish') || localStorage.getItem('saved_birthday_wish');
-      let musicParam = urlParams.get('music') || localStorage.getItem('saved_birthday_music');
+      let nameParam = urlParams.get('name') || safeGetStorage('saved_birthday_name');
+      let wishParam = urlParams.get('wish') || safeGetStorage('saved_birthday_wish');
+      let musicParam = urlParams.get('music') || safeGetStorage('saved_birthday_music');
 
       if (nameParam) {
         document.getElementById('displayName').innerText = nameParam;
@@ -628,7 +653,6 @@
       createFloatingBalloons();
       setTimeout(triggerConfetti, 600);
 
-      // Single click listener to overcome browser autoplay blocks
       document.addEventListener('click', function startAudioOnInteraction() {
         if (!isPlaying) {
           playBirthdayMusic();
@@ -666,12 +690,14 @@
       document.getElementById('displayName').innerText = name;
       document.getElementById('displayWish').innerText = wish;
 
-      localStorage.setItem('saved_birthday_name', name);
-      localStorage.setItem('saved_birthday_wish', wish);
-      localStorage.setItem('saved_birthday_music', musicToSave);
+      safeSetStorage('saved_birthday_name', name);
+      safeSetStorage('saved_birthday_wish', wish);
+      safeSetStorage('saved_birthday_music', musicToSave);
 
-      const newUrl = `${window.location.pathname}?name=${encodeURIComponent(name)}&wish=${encodeURIComponent(wish)}&music=${encodeURIComponent(musicToSave)}`;
-      window.history.pushState({ path: newUrl }, '', newUrl);
+      try {
+        const newUrl = `${window.location.pathname}?name=${encodeURIComponent(name)}&wish=${encodeURIComponent(wish)}&music=${encodeURIComponent(musicToSave)}`;
+        window.history.pushState({ path: newUrl }, '', newUrl);
+      } catch (e) {}
 
       showToast('Settings Saved! 🎉');
       closeSettingsModal();
@@ -682,18 +708,15 @@
       saveSettingsAndApply();
       const name = document.getElementById('inputName').value.trim() || 'Friend';
       const link = window.location.href;
-      
       const message = `🤫 Shhh... ${name}, someone sent you a secret birthday surprise!\n\nTap the link below to open your gift & blow out your candles: 👇\n${link}`;
-      
       const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
       window.open(waUrl, '_blank');
     }
 
-    // Built-in Synthesizer Chime Fallback
     let isPlayingMelody = false;
     function playHappyBirthdayMelody() {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      if (isPlayingMelody) return;
+      initAudioContext();
+      if (!audioCtx || isPlayingMelody) return;
       
       isPlayingMelody = true;
       isPlaying = true;
@@ -735,9 +758,10 @@
       });
     }
 
-    // Candle Blowing Sound Effect
     function playBlowingSound() {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      initAudioContext();
+      if (!audioCtx) return;
+
       const bufferSize = audioCtx.sampleRate * 0.8;
       const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -765,9 +789,10 @@
       noise.start();
     }
 
-    // Balloon Pop Sound Effect
     function playPopSound() {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
+      initAudioContext();
+      if (!audioCtx) return;
+
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       
