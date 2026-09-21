@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>happy Birthday! 🎉</title>
+  <title>Happy Birthday 🎉</title>
 
   <!-- Confetti, Icons & Fonts -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -74,191 +74,6 @@
       }
     }
 
-    /* Articulated Dancing Toys Layout */
-    .toy-dancer {
-      position: absolute;
-      bottom: 20px;
-      width: 90px;
-      height: 150px;
-      display: none;
-      z-index: 12;
-      user-select: none;
-    }
-
-    .toy-dancer.left {
-      left: 10%;
-      animation: bodyBounceLeft 0.8s ease-in-out infinite alternate;
-    }
-
-    .toy-dancer.right {
-      right: 10%;
-      animation: bodyBounceRight 0.8s ease-in-out infinite alternate;
-    }
-
-    /* Party Hat */
-    .toy-hat {
-      position: absolute;
-      top: -22px;
-      left: 28px;
-      width: 0;
-      height: 0;
-      border-left: 14px solid transparent;
-      border-right: 14px solid transparent;
-      border-bottom: 28px solid #ff3366;
-      transform-origin: bottom center;
-    }
-    .left .toy-hat { border-bottom-color: #ff3366; animation: hatTiltLeft 0.8s ease-in-out infinite alternate; }
-    .right .toy-hat { border-bottom-color: #ffd166; animation: hatTiltRight 0.8s ease-in-out infinite alternate; }
-
-    .toy-hat::after {
-      content: '';
-      position: absolute;
-      top: -6px;
-      left: -4px;
-      width: 8px;
-      height: 8px;
-      background: #ffffff;
-      border-radius: 50%;
-    }
-
-    /* Head */
-    .toy-head {
-      position: absolute;
-      top: 0;
-      left: 22px;
-      width: 46px;
-      height: 46px;
-      background: #fcd34d;
-      border-radius: 50%;
-      box-shadow: inset -4px -4px 0px rgba(0,0,0,0.1);
-    }
-    .right .toy-head { background: #fca5a5; }
-
-    /* Eyes & Smile */
-    .toy-face {
-      position: absolute;
-      top: 14px;
-      left: 10px;
-      width: 26px;
-      height: 16px;
-    }
-    .eye {
-      position: absolute;
-      width: 5px;
-      height: 7px;
-      background: #1e1b4b;
-      border-radius: 50%;
-      top: 2px;
-      animation: blink 3s infinite;
-    }
-    .eye.left-eye { left: 3px; }
-    .eye.right-eye { right: 3px; }
-
-    .smile {
-      position: absolute;
-      bottom: 2px;
-      left: 7px;
-      width: 12px;
-      height: 6px;
-      border-bottom: 2px solid #1e1b4b;
-      border-radius: 0 0 10px 10px;
-    }
-
-    @keyframes blink {
-      0%, 96%, 100% { transform: scaleY(1); }
-      98% { transform: scaleY(0.1); }
-    }
-
-    /* Torso / Birthday Costume Body */
-    .toy-body {
-      position: absolute;
-      top: 45px;
-      left: 25px;
-      width: 40px;
-      height: 50px;
-      background: #3b82f6;
-      border-radius: 12px 12px 6px 6px;
-    }
-    .right .toy-body { background: #ec4899; }
-
-    /* Moving Arms (Hands & Joints) */
-    .toy-arm {
-      position: absolute;
-      top: 48px;
-      width: 12px;
-      height: 38px;
-      background: #fcd34d;
-      border-radius: 6px;
-      transform-origin: top center;
-    }
-    .right .toy-arm { background: #fca5a5; }
-
-    .toy-arm.left-arm {
-      left: 14px;
-      animation: moveArmLeft 0.8s ease-in-out infinite alternate;
-    }
-    .toy-arm.right-arm {
-      right: 14px;
-      animation: moveArmRight 0.8s ease-in-out infinite alternate;
-    }
-
-    /* Moving Legs (Feet & Steps) */
-    .toy-leg {
-      position: absolute;
-      top: 93px;
-      width: 12px;
-      height: 42px;
-      background: #1e293b;
-      border-radius: 6px;
-      transform-origin: top center;
-    }
-
-    .toy-leg.left-leg {
-      left: 28px;
-      animation: moveLegLeft 0.8s ease-in-out infinite alternate;
-    }
-    .toy-leg.right-leg {
-      right: 28px;
-      animation: moveLegRight 0.8s ease-in-out infinite alternate;
-    }
-
-    /* Dance Choreography Keyframes */
-    @keyframes bodyBounceLeft {
-      0% { transform: translateY(0) rotate(-5deg); }
-      100% { transform: translateY(-20px) rotate(5deg); }
-    }
-    @keyframes bodyBounceRight {
-      0% { transform: translateY(0) rotate(5deg); }
-      100% { transform: translateY(-20px) rotate(-5deg); }
-    }
-
-    @keyframes hatTiltLeft {
-      0% { transform: rotate(-10deg) skewX(-5deg); }
-      100% { transform: rotate(15deg) skewX(5deg); }
-    }
-    @keyframes hatTiltRight {
-      0% { transform: rotate(10deg) skewX(5deg); }
-      100% { transform: rotate(-15deg) skewX(-5deg); }
-    }
-
-    @keyframes moveArmLeft {
-      0% { transform: rotate(-45deg); }
-      100% { transform: rotate(65deg); }
-    }
-    @keyframes moveArmRight {
-      0% { transform: rotate(45deg); }
-      100% { transform: rotate(-65deg); }
-    }
-
-    @keyframes moveLegLeft {
-      0% { transform: rotate(25deg) translateY(0); }
-      100% { transform: rotate(-35deg) translateY(-5px); }
-    }
-    @keyframes moveLegRight {
-      0% { transform: rotate(-25deg) translateY(-5px); }
-      100% { transform: rotate(35deg) translateY(0); }
-    }
-
     /* Minimal Settings Button */
     .settings-gear-btn {
       position: absolute;
@@ -294,7 +109,7 @@
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 28px;
-      padding: 40px 28px;
+      padding: 48px 32px;
       max-width: 420px;
       width: 100%;
       text-align: center;
@@ -304,13 +119,13 @@
     /* Floating Cake Emoji */
     .cake-wrapper {
       display: inline-block;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       cursor: pointer;
       animation: float 4s ease-in-out infinite;
     }
 
     .cake {
-      font-size: 4.5rem;
+      font-size: 5rem;
       user-select: none;
       transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
@@ -331,7 +146,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     .subtitle {
@@ -340,15 +155,15 @@
       font-size: 0.75rem;
       font-weight: 800;
       color: #ff3366;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 2.2rem;
       font-weight: 800;
       letter-spacing: -0.5px;
       color: #ffffff;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       line-height: 1.2;
     }
 
@@ -359,45 +174,19 @@
     }
 
     .wish {
-      font-size: 0.9rem;
-      line-height: 1.5;
+      font-size: 0.98rem;
+      line-height: 1.6;
       color: #94a3b8;
       font-weight: 400;
-      margin-bottom: 20px;
     }
 
-    /* Visible YouTube Mini Player Wrapper */
-    .player-section {
-      background: rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      padding: 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    #yt-player {
-      width: 100px;
-      height: 60px;
-      border-radius: 8px;
-      overflow: hidden;
-      flex-shrink: 0;
-      background: #000;
-    }
-
-    .player-info {
-      text-align: left;
+    /* Audio Playing Indicator */
+    .music-status {
+      display: none;
       font-size: 0.8rem;
-      color: #cbd5e1;
-      overflow: hidden;
-    }
-
-    .player-info strong {
-      display: block;
-      color: #fff;
-      font-size: 0.85rem;
-      margin-bottom: 2px;
+      color: #10b981;
+      font-weight: 600;
+      margin-top: 16px;
     }
 
     /* Minimal Modal Styling */
@@ -502,6 +291,16 @@
     }
 
     .btn:hover { opacity: 0.9; }
+
+    /* Hidden YouTube Player (Required for audio execution on mobile) */
+    #yt-hidden-container {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      width: 200px;
+      height: 200px;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -509,38 +308,9 @@
   <div class="bg-glow"></div>
   <div id="rain-container"></div>
 
-  <!-- Left Toy Dancer (Boy in Party Costume) -->
-  <div class="toy-dancer left" id="leftToy">
-    <div class="toy-hat"></div>
-    <div class="toy-head">
-      <div class="toy-face">
-        <div class="eye left-eye"></div>
-        <div class="eye right-eye"></div>
-        <div class="smile"></div>
-      </div>
-    </div>
-    <div class="toy-body"></div>
-    <div class="toy-arm left-arm"></div>
-    <div class="toy-arm right-arm"></div>
-    <div class="toy-leg left-leg"></div>
-    <div class="toy-leg right-leg"></div>
-  </div>
-
-  <!-- Right Toy Dancer (Girl in Party Costume) -->
-  <div class="toy-dancer right" id="rightToy">
-    <div class="toy-hat"></div>
-    <div class="toy-head">
-      <div class="toy-face">
-        <div class="eye left-eye"></div>
-        <div class="eye right-eye"></div>
-        <div class="smile"></div>
-      </div>
-    </div>
-    <div class="toy-body"></div>
-    <div class="toy-arm left-arm"></div>
-    <div class="toy-arm right-arm"></div>
-    <div class="toy-leg left-leg"></div>
-    <div class="toy-leg right-leg"></div>
+  <!-- Offscreen YouTube Player Container -->
+  <div id="yt-hidden-container">
+    <div id="yt-player"></div>
   </div>
 
   <!-- Minimal Settings Button -->
@@ -554,20 +324,15 @@
       <div class="cake" id="cakeEmoji">🎂</div>
     </div>
     
-    <span class="tap-hint" id="tapHint">👇 Tap cake to start music & toy dance</span>
+    <span class="tap-hint" id="tapHint">👇 Tap cake to play song</span>
 
     <div class="subtitle">Happy Birthday</div>
     <h1><span class="highlight-name" id="displayName">Alex</span> 🎉</h1>
     
     <p class="wish" id="displayWish">Wishing you a wonderful day filled with happiness, laughter, and great memories!</p>
 
-    <!-- Visible Mini Player Box -->
-    <div class="player-section">
-      <div id="yt-player"></div>
-      <div class="player-info">
-        <strong>Birthday Track</strong>
-        <span id="playerStatusText">Tap cake to play audio</span>
-      </div>
+    <div class="music-status" id="musicStatus">
+      <i class="fa-solid fa-music"></i> Playing song...
     </div>
   </div>
 
@@ -604,17 +369,15 @@
   <script>
     let ytPlayer = null;
     let isYTReady = false;
-    let targetVideoId = 'kJQP7kiw5Fk'; // Default upbeat celebratory track if none provided
+    let targetVideoId = '';
     let rainInterval = null;
 
+    // Birthday rain elements
     const birthdayItems = ['🎈', '🎂', '🎁', '🎉', '✨', '🥳', '🧁', '⭐'];
 
-    function startPartyEffects() {
-      // Show animated articulated toys
-      document.getElementById('leftToy').style.display = 'block';
-      document.getElementById('rightToy').style.display = 'block';
+    function startBirthdayRain() {
+      if (rainInterval) return; // Prevent multiple rain timers
 
-      if (rainInterval) return;
       const rainContainer = document.getElementById('rain-container');
       
       rainInterval = setInterval(() => {
@@ -622,9 +385,10 @@
         item.classList.add('falling-item');
         item.innerText = birthdayItems[Math.floor(Math.random() * birthdayItems.length)];
         
+        // Random horizontal position, duration, and size
         const startLeft = Math.random() * 100;
-        const duration = 3 + Math.random() * 3;
-        const fontSize = 1.2 + Math.random() * 1.2;
+        const duration = 3 + Math.random() * 3; // 3s to 6s
+        const fontSize = 1.2 + Math.random() * 1.2; // 1.2rem to 2.4rem
 
         item.style.left = startLeft + 'vw';
         item.style.animationDuration = duration + 's';
@@ -632,12 +396,14 @@
 
         rainContainer.appendChild(item);
 
+        // Remove element after animation finishes
         setTimeout(() => {
           item.remove();
         }, duration * 1000);
       }, 300);
     }
 
+    // Extract 11-character video ID from YouTube links
     function parseYouTubeId(url) {
       if (!url) return null;
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|shorts\/|watch\?v=|\&v=)([^#\&\?]*).*/;
@@ -645,26 +411,33 @@
       return (match && match[2].length === 11) ? match[2] : null;
     }
 
+    // Called automatically when YouTube API loads
     function onYouTubeIframeAPIReady() {
       ytPlayer = new YT.Player('yt-player', {
-        height: '60',
-        width: '100',
-        videoId: targetVideoId,
-        playerVars: { 'autoplay': 0, 'controls': 1, 'enablejsapi': 1, 'modestbranding': 1 },
+        height: '200',
+        width: '200',
+        videoId: '',
+        playerVars: {
+          'autoplay': 0,
+          'controls': 0,
+          'disablekb': 1,
+          'enablejsapi': 1
+        },
         events: {
-          'onReady': (e) => {
+          'onReady': () => {
             isYTReady = true;
-            e.target.setVolume(100);
-          },
-          'onStateChange': (e) => {
-            if (e.data === YT.PlayerState.PLAYING) {
-              document.getElementById('playerStatusText').innerText = '🎵 Playing audio & dancing!';
+            if (targetVideoId) {
+              ytPlayer.cueVideoById(targetVideoId);
             }
+          },
+          'onError': () => {
+            console.warn("YouTube embedding restricted for this video.");
           }
         }
       });
     }
 
+    // Read URL parameters on startup
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const name = params.get('name') || 'Alex';
@@ -680,24 +453,30 @@
       if (yt) {
         targetVideoId = parseYouTubeId(yt) || yt;
         document.getElementById('inputYtUrl').value = `https://www.youtube.com/watch?v=${targetVideoId}`;
-      } else {
-        document.getElementById('inputYtUrl').value = `https://www.youtube.com/watch?v=${targetVideoId}`;
       }
     });
 
+    // Handle Cake Click
     function onCakeClick() {
+      // 1. Pop Confetti
       if (typeof confetti === 'function') {
         confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
       }
 
-      startPartyEffects();
+      // 2. Start Birthday Rain Effect
+      startBirthdayRain();
 
-      if (isYTReady && ytPlayer) {
+      // 3. Play YouTube Audio
+      if (targetVideoId && isYTReady && ytPlayer) {
         if (typeof ytPlayer.playVideo === 'function') {
           ytPlayer.loadVideoById(targetVideoId);
           ytPlayer.playVideo();
+          document.getElementById('musicStatus').style.display = 'block';
           document.getElementById('tapHint').style.display = 'none';
         }
+      } else if (!targetVideoId) {
+        alert("No YouTube song configured! Click the gear icon (⚙️) to set a song.");
+        openModal();
       }
     }
 
@@ -715,11 +494,12 @@
       }
     };
 
+    // Build the shareable URL
     function getShareUrl() {
       const name = document.getElementById('inputName').value.trim() || 'Friend';
       const wish = document.getElementById('inputWish').value.trim() || 'Happy Birthday!';
       const rawYtUrl = document.getElementById('inputYtUrl').value.trim();
-      const ytId = parseYouTubeId(rawYtUrl) || targetVideoId;
+      const ytId = parseYouTubeId(rawYtUrl);
 
       document.getElementById('displayName').innerText = name;
       document.getElementById('displayWish').innerText = wish;
@@ -746,7 +526,7 @@
     function shareWhatsApp() {
       const link = getShareUrl();
       const name = document.getElementById('inputName').value.trim() || 'Friend';
-      const text = `🎉 Happy Birthday ${name}! View your birthday card & toy dance performance here:\n${link}`;
+      const text = `🎉 Happy Birthday ${name}! View your birthday card & song here:\n${link}`;
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
       closeModal();
     }
