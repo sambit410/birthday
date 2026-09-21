@@ -383,8 +383,8 @@
 
     <!-- Controls -->
     <div class="action-bar">
+      <button class="icon-btn" onclick="triggerConfetti(); playHappyBirthdayMelody();" title="Play Happy Birthday Song">🎶</button>
       <button class="icon-btn" onclick="triggerConfetti()" title="Pop Confetti">🎉</button>
-      <button class="icon-btn" onclick="playPartySound()" title="Play Sound">🎵</button>
       <button class="icon-btn" onclick="toggleCreator()" title="Create New Link">⚙️</button>
     </div>
 
@@ -403,31 +403,110 @@
   <div class="toast" id="toast">Saved! Link copied to clipboard 📋</div>
 
   <script>
-    // Built-in Synthesizer for Audio effects (no external mp3 files required)
+    // Audio Synthesizer Engine
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    function playTone(freq, type, duration) {
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type || 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
+    // 1. Full Happy Birthday Song Synthesizer Melody
+    let isPlayingMelody = false;
+    function playHappyBirthdayMelody() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      if (isPlayingMelody) return;
+      
+      isPlayingMelody = true;
+      const tempo = 180; // Beats per minute
+      const beat = 60 / tempo;
+
+      // Note Frequencies in Hertz (C Major scale)
+      const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23, G4 = 392.00, A4 = 440.00, Bb4 = 466.16, C5 = 523.25;
+
+      // Song Notes: [Frequency, Duration in Beats]
+      const notes = [
+        [C4, 0.75], [C4, 0.25], [D4, 1], [C4, 1], [F4, 1], [E4, 2],
+        [C4, 0.75], [C4, 0.25], [D4, 1], [C4, 1], [G4, 1], [F4, 2],
+        [C4, 0.75], [C4, 0.25], [C5, 1], [A4, 1], [F4, 1], [E4, 1], [D4, 2],
+        [Bb4, 0.75], [Bb4, 0.25], [A4, 1], [F4, 1], [G4, 1], [F4, 2]
+      ];
+
+      let startTime = audioCtx.currentTime;
+
+      notes.forEach(([freq, beats], index) => {
+        const duration = beats * beat;
+        
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'triangle'; // Warm chime sound
+        osc.frequency.setValueAtTime(freq, startTime);
+        
+        // Volume envelope
+        gain.gain.setValueAtTime(0.2, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration - 0.03);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + duration);
+
+        startTime += duration;
+
+        // Reset state after song finishes
+        if (index === notes.length - 1) {
+          setTimeout(() => { isPlayingMelody = false; }, (startTime - audioCtx.currentTime) * 1000);
+        }
+      });
     }
 
-    function playPartySound() {
-      const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
-      notes.forEach((freq, idx) => {
-        setTimeout(() => playTone(freq, 'triangle', 0.4), idx * 100);
-      });
-      triggerConfetti();
+    // 2. Realistic Blowing Wind Sound (Candle Blow)
+    function playBlowingSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      
+      const bufferSize = audioCtx.sampleRate * 0.8; // 0.8 seconds duration
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1; // White noise
+      }
+
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(400, audioCtx.currentTime);
+      filter.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.8);
+
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      noise.start();
+    }
+
+    // 3. Balloon Pop Sound
+    function playPopSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.06);
+
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.06);
     }
 
     // Load Recipient Name & Wish on Page Load
@@ -436,13 +515,8 @@
       let nameParam = urlParams.get('name');
       let wishParam = urlParams.get('wish');
 
-      // Fallback to local storage if refreshed without URL params
-      if (!nameParam) {
-        nameParam = localStorage.getItem('saved_birthday_name');
-      }
-      if (!wishParam) {
-        wishParam = localStorage.getItem('saved_birthday_wish');
-      }
+      if (!nameParam) nameParam = localStorage.getItem('saved_birthday_name');
+      if (!wishParam) wishParam = localStorage.getItem('saved_birthday_wish');
 
       if (nameParam) {
         document.getElementById('displayName').innerText = nameParam;
@@ -471,24 +545,19 @@
       }
     }
 
-    // Save details to URL bar & LocalStorage so refresh remembers it
     function saveAndUpdateDetails() {
       const name = document.getElementById('inputName').value.trim() || 'Birthday Star';
       const wish = document.getElementById('inputWish').value.trim();
 
-      // Update screen text
       document.getElementById('displayName').innerText = name;
       document.getElementById('displayWish').innerText = wish;
 
-      // 1. Save to local browser memory
       localStorage.setItem('saved_birthday_name', name);
       localStorage.setItem('saved_birthday_wish', wish);
 
-      // 2. Update address bar parameters
       const newUrl = `${window.location.pathname}?name=${encodeURIComponent(name)}&wish=${encodeURIComponent(wish)}`;
       window.history.pushState({ path: newUrl }, '', newUrl);
 
-      // 3. Copy link to clipboard
       navigator.clipboard.writeText(window.location.href).then(() => {
         showToast('Saved & copied link! 📋');
       }).catch(() => {
@@ -496,7 +565,6 @@
       });
     }
 
-    // Share link directly on WhatsApp with Teaser Text
     function shareToWhatsApp() {
       saveAndUpdateDetails();
       const name = document.getElementById('inputName').value.trim() || 'Friend';
@@ -517,12 +585,15 @@
 
     let candlesBlown = false;
     function blowOutCandles() {
+      playBlowingSound();
       if (!candlesBlown) {
-        document.getElementById('cakeEmoji').innerText = '🍰';
-        document.getElementById('cakeHint').innerHTML = '✨ Make a Wish! Candles blown out! ✨';
-        playPartySound();
-        triggerConfetti();
-        candlesBlown = true;
+        setTimeout(() => {
+          document.getElementById('cakeEmoji').innerText = '🍰';
+          document.getElementById('cakeHint').innerHTML = '✨ Make a Wish! Candles blown out! ✨';
+          playHappyBirthdayMelody();
+          triggerConfetti();
+          candlesBlown = true;
+        }, 300);
       } else {
         triggerConfetti();
       }
@@ -535,7 +606,7 @@
       giftBox.innerText = '🎁✨';
       giftMsg.style.display = 'block';
       triggerConfetti();
-      playTone(587.33, 'sine', 0.5);
+      playHappyBirthdayMelody();
     }
 
     function triggerConfetti() {
@@ -561,7 +632,7 @@
         balloon.style.animationDelay = `${Math.random() * 5}s`;
         
         balloon.addEventListener('click', () => {
-          playTone(800, 'square', 0.1);
+          playPopSound();
           balloon.style.display = 'none';
         });
 
