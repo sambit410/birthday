@@ -259,40 +259,95 @@
       box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
     }
 
-    /* Music Widget Status */
-    .music-widget-status {
-      background: rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      padding: 12px;
+    /* YouTube Music Style Player Widget */
+    .yt-music-player {
+      background: rgba(25, 20, 30, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 14px 16px;
       margin-bottom: 20px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       text-align: left;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
 
-    .music-icon {
-      width: 40px;
-      height: 40px;
-      background: #e11d48;
+    .yt-album-art {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #ff0033, #ff758c);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: #fff;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(255, 0, 51, 0.4);
+      position: relative;
+    }
+
+    .yt-album-art.playing::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      border: 2px solid #ff758c;
+      animation: pulseArt 1.5s infinite;
+    }
+
+    @keyframes pulseArt {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.15); opacity: 0; }
+    }
+
+    .yt-track-info {
+      flex-grow: 1;
+      overflow: hidden;
+    }
+
+    .yt-track-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .yt-track-subtitle {
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    .yt-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .yt-control-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #fff;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
-      flex-shrink: 0;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s, transform 0.2s;
     }
 
-    .music-details strong {
-      display: block;
-      font-size: 0.85rem;
-      color: #fff;
-    }
-
-    .music-details span {
-      font-size: 0.75rem;
-      color: #94a3b8;
+    .yt-control-btn:hover {
+      background: #e11d48;
+      transform: scale(1.05);
     }
 
     /* Letter Section */
@@ -427,28 +482,34 @@
   <!-- MAIN CONTAINER (Only Section 1 and Section 4 Letter) -->
   <div class="main-container" id="mainContainer">
 
-    <!-- SECTION 1: MAIN CARD & MUSIC -->
+    <!-- SECTION 1: MAIN CARD & YOUTUBE MUSIC PLAYER -->
     <div class="section-card active" id="sec1">
       <div class="toy-container">
         <div class="toy"></div>
         <div class="toy girl"></div>
       </div>
       <div class="greeting">Happy Birthday</div>
-      <h1 id="displayName">My Special One 💖</h1>
-      <p class="message-text" id="displayIntro">Today is yours. A whole garden of wishes, for every laugh we've shared, every silly moment, and every reason you make the world brighter!</p>
+      <h1 id="displayName">Sambit Kumar Sahoo</h1>
+      <p class="message-text" id="displayIntro">Love you</p>
       
-      <div class="music-widget-status">
-        <div class="music-icon"><i class="fa-solid fa-music"></i></div>
-        <div class="music-details">
-          <strong id="displaySongTitle">YouTube Music Vibe</strong>
-          <span>Syncs automatically on open</span>
+      <!-- YouTube Music Type Player Widget -->
+      <div class="yt-music-player">
+        <div class="yt-album-art" id="albumArtIcon"><i class="fa-solid fa-music"></i></div>
+        <div class="yt-track-info">
+          <div class="yt-track-title" id="displaySongTitle">YouTube Music Vibe</div>
+          <div class="yt-track-subtitle" id="displaySongArtist">Background Melody</div>
+        </div>
+        <div class="yt-controls">
+          <button class="yt-control-btn" id="playPauseBtn" onclick="togglePlayPause()" title="Play / Pause">
+            <i class="fa-solid fa-play" id="playPauseIcon"></i>
+          </button>
         </div>
       </div>
 
       <button class="action-btn" onclick="nextSection(4)">Read My Letter <i class="fa-solid fa-arrow-right"></i></button>
     </div>
 
-    <!-- SECTION 2 (Originally Section 4): SECRET LETTER -->
+    <!-- SECTION 2: SECRET LETTER -->
     <div class="section-card" id="sec4">
       <div class="greeting">A Letter Just For You</div>
       <h1>My Heartfelt Note 💌</h1>
@@ -473,10 +534,10 @@
       </div>
 
       <label for="inputName">Card Title / Recipient Name</label>
-      <input type="text" id="inputName" placeholder="My Special One 💖">
+      <input type="text" id="inputName" placeholder="Sambit Kumar Sahoo" value="Sambit Kumar Sahoo">
 
       <label for="inputIntro">Intro Greeting Message</label>
-      <textarea id="inputIntro" rows="2" placeholder="Write main intro text..."></textarea>
+      <textarea id="inputIntro" rows="2" placeholder="Write main intro text...">Love you</textarea>
 
       <label for="inputLetter">Secret Letter Message</label>
       <textarea id="inputLetter" rows="4" placeholder="Write your heartfelt letter..."></textarea>
@@ -501,6 +562,7 @@
     let ytPlayer = null;
     let isYTReady = false;
     let targetVideoId = 'jfKfPfyJRdk'; // Default relaxing background track ID
+    let isPlaying = false;
 
     // Parse YouTube ID from various link formats
     function parseYouTubeId(url) {
@@ -517,9 +579,43 @@
         videoId: targetVideoId,
         playerVars: { 'autoplay': 0, 'controls': 0, 'enablejsapi': 1 },
         events: {
-          'onReady': () => { isYTReady = true; }
+          'onReady': () => { isYTReady = true; updateSongTitleUI(); },
+          'onStateChange': onPlayerStateChange
         }
       });
+    }
+
+    function onPlayerStateChange(event) {
+      const playIcon = document.getElementById('playPauseIcon');
+      const artIcon = document.getElementById('albumArtIcon');
+      if (event.data === YT.PlayerState.PLAYING) {
+        isPlaying = true;
+        playIcon.className = 'fa-solid fa-pause';
+        artIcon.classList.add('playing');
+      } else {
+        isPlaying = false;
+        playIcon.className = 'fa-solid fa-play';
+        artIcon.classList.remove('playing');
+      }
+    }
+
+    function togglePlayPause() {
+      if (!isYTReady || !ytPlayer) return;
+      if (isPlaying) {
+        ytPlayer.pauseVideo();
+      } else {
+        ytPlayer.playVideo();
+      }
+    }
+
+    function updateSongTitleUI() {
+      if (isYTReady && ytPlayer && typeof ytPlayer.getVideoData === 'function') {
+        const data = ytPlayer.getVideoData();
+        if (data && data.title) {
+          document.getElementById('displaySongTitle').innerText = data.title;
+          document.getElementById('displaySongArtist').innerText = data.author || 'YouTube Music';
+        }
+      }
     }
 
     // Load custom parameters from URL on load
@@ -546,7 +642,10 @@
         const parsed = parseYouTubeId(yt) || yt;
         targetVideoId = parsed;
         document.getElementById('inputYtUrl').value = `https://www.youtube.com/watch?v=${targetVideoId}`;
-        if (isYTReady) ytPlayer.cueVideoById(targetVideoId);
+        if (isYTReady) {
+          ytPlayer.loadVideoById(targetVideoId);
+          setTimeout(updateSongTitleUI, 1000);
+        }
       }
     });
 
@@ -562,6 +661,7 @@
       if (isYTReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
         ytPlayer.loadVideoById(targetVideoId);
         ytPlayer.playVideo();
+        setTimeout(updateSongTitleUI, 1000);
       }
     }
 
@@ -612,7 +712,10 @@
       }
       if (ytId) {
         targetVideoId = ytId;
-        if (isYTReady) ytPlayer.cueVideoById(targetVideoId);
+        if (isYTReady) {
+          ytPlayer.cueVideoById(targetVideoId);
+          setTimeout(updateSongTitleUI, 1000);
+        }
       }
 
       const baseUrl = window.location.origin + window.location.pathname;
@@ -638,7 +741,7 @@
 
     function shareWhatsApp() {
       const link = getShareUrl();
-      const name = document.getElementById('inputName').value.trim() || 'My Special One';
+      const name = document.getElementById('inputName').value.trim() || 'Sambit Kumar Sahoo';
       const text = `🎉 Happy Birthday ${name}! Open your interactive digital card & song here:\n${link}`;
       window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
       closeModal();
