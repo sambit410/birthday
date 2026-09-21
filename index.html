@@ -46,7 +46,7 @@
       position: relative;
     }
 
-    /* Floating Background Particles */
+    /* Floating Background Balloons */
     .bg-balloon {
       position: absolute;
       bottom: -100px;
@@ -143,7 +143,12 @@
       transition: border 0.3s;
     }
 
-    .form-group input:focus, .form-group textarea:focus {
+    .form-group select option {
+      background: #1e1b4b;
+      color: #fff;
+    }
+
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
       border-color: var(--primary);
     }
 
@@ -296,7 +301,7 @@
       transform: scale(1.1);
     }
 
-    /* Notification Toast */
+    /* Toast Notification */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -322,18 +327,21 @@
   <!-- Floating background balloons -->
   <div id="balloon-container"></div>
 
+  <!-- HTML5 Audio Element for Custom Audio Files -->
+  <audio id="customAudioPlayer" preload="auto"></audio>
+
   <div class="container">
     
     <!-- Creator Drawer Toggle Button -->
     <button class="creator-toggle" onclick="toggleCreator()">
-      <i class="fa-solid fa-wand-magic-sparkles"></i>
-      <span>Change Name or Message</span>
+      <i class="fa-solid fa-gear"></i>
+      <span>Settings: Name, Wish & Music</span>
     </button>
 
     <!-- Creator Input Panel -->
     <div class="creator-panel" id="creatorPanel">
       <h3 style="margin-bottom: 12px; color: var(--accent); font-size: 1.1rem;">
-        <i class="fa-solid fa-pen-to-square"></i> Set Recipient Details
+        <i class="fa-solid fa-pen-to-square"></i> Webpage Settings
       </h3>
       
       <div class="form-group">
@@ -342,22 +350,43 @@
       </div>
 
       <div class="form-group">
-        <label>Select or Type Birthday Wish:</label>
-        <select id="wishPreset" onchange="applyPresetWish(this.value)">
+        <label>Birthday Wish Message:</label>
+        <select id="wishPreset" onchange="applyPresetWish(this.value)" style="margin-bottom: 8px;">
           <option value="custom">-- Choose a Wish Preset --</option>
           <option value="Wishing you a day filled with laughter, love, joy, and endless cake! 🎂✨">Fun & Sweet Wish</option>
           <option value="May this year bring you closer to your biggest dreams and grandest goals! 🚀🌟">Inspirational Wish</option>
           <option value="Happy Birthday to my best friend! Grateful for another year of insane adventures with you! 🥳💖">Best Friend Wish</option>
           <option value="Wishing you abundant health, wealth, success, and pure happiness always! 🍀🎉">Heartfelt Wish</option>
         </select>
+        <textarea id="inputWish" rows="3" placeholder="Type custom message..."></textarea>
       </div>
 
-      <div class="form-group">
-        <textarea id="inputWish" rows="3" placeholder="Type your custom birthday wish here..."></textarea>
+      <!-- Music Settings Section -->
+      <div class="form-group" style="border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 12px;">
+        <label><i class="fa-solid fa-music" style="color: var(--accent);"></i> Choose Birthday Music Track:</label>
+        <select id="musicSelect" onchange="handleMusicOptionChange(this.value)">
+          <option value="synth">🎹 Built-in Synth Chime Tune (Default)</option>
+          <option value="preset1">🎺 Orchestral Birthday Celebration (MP3)</option>
+          <option value="preset2">🎸 Upbeat Acoustic Birthday Track (MP3)</option>
+          <option value="customUrl">🔗 Paste Custom MP3 Link (URL)</option>
+          <option value="fileUpload">📁 Upload MP3 File from Device</option>
+        </select>
+      </div>
+
+      <!-- Input for Custom MP3 Link -->
+      <div class="form-group" id="customUrlGroup" style="display: none;">
+        <label>Direct MP3 Audio Link:</label>
+        <input type="url" id="inputMusicUrl" placeholder="https://example.com/my-song.mp3">
+      </div>
+
+      <!-- Input for File Upload -->
+      <div class="form-group" id="fileUploadGroup" style="display: none;">
+        <label>Upload Audio File from your Phone/PC:</label>
+        <input type="file" id="inputFileUpload" accept="audio/*" onchange="handleFileSelected(event)">
       </div>
 
       <button class="btn-action" onclick="saveAndUpdateDetails()">
-        <i class="fa-solid fa-floppy-disk"></i> Save & Copy Link
+        <i class="fa-solid fa-floppy-disk"></i> Save Settings & Copy Link
       </button>
 
       <button class="btn-action btn-whatsapp" onclick="shareToWhatsApp()">
@@ -378,14 +407,14 @@
     <div class="cake-container" onclick="blowOutCandles()">
       <div class="cake-emoji" id="cakeEmoji">🎂</div>
       <br>
-      <span class="candle-hint" id="cakeHint"><i class="fa-solid fa-wind"></i> Tap cake to blow candles!</span>
+      <span class="candle-hint" id="cakeHint"><i class="fa-solid fa-wind"></i> Tap cake to blow candles & play music!</span>
     </div>
 
     <!-- Controls -->
     <div class="action-bar">
-      <button class="icon-btn" onclick="triggerConfetti(); playHappyBirthdayMelody();" title="Play Happy Birthday Song">🎶</button>
+      <button class="icon-btn" onclick="triggerConfetti(); playBirthdayMusic();" title="Play Birthday Song">🎶</button>
       <button class="icon-btn" onclick="triggerConfetti()" title="Pop Confetti">🎉</button>
-      <button class="icon-btn" onclick="toggleCreator()" title="Create New Link">⚙️</button>
+      <button class="icon-btn" onclick="toggleCreator()" title="Open Page Settings">⚙️</button>
     </div>
 
     <!-- Interactive Gift Box -->
@@ -403,28 +432,83 @@
   <div class="toast" id="toast">Saved! Link copied to clipboard 📋</div>
 
   <script>
-    // High-Output Audio Synthesizer Engine
+    // Audio Player & Synthesizer State
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // Master Volume Boost Node
     const masterGain = audioCtx.createGain();
-    masterGain.gain.value = 1.0; // Baseline at maximum output
+    masterGain.gain.value = 1.0;
     masterGain.connect(audioCtx.destination);
 
-    let isPlayingMelody = false;
+    const customAudioPlayer = document.getElementById('customAudioPlayer');
+    let currentMusicSource = 'synth'; // Options: synth, url, file
+    let customAudioUrl = '';
 
-    // 1. Loud & Clear Happy Birthday Melody Synthesizer
-    function playHappyBirthdayMelody() {
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
+    // Sample Free Royalty MP3 Presets
+    const PRESET_MUSIC = {
+      preset1: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a8e32c.mp3',
+      preset2: 'https://cdn.pixabay.com/download/audio/2021/09/06/audio_8b49e6f1f4.mp3'
+    };
+
+    function handleMusicOptionChange(val) {
+      const urlGroup = document.getElementById('customUrlGroup');
+      const fileGroup = document.getElementById('fileUploadGroup');
+
+      urlGroup.style.display = 'none';
+      fileGroup.style.display = 'none';
+
+      if (val === 'customUrl') {
+        urlGroup.style.display = 'block';
+        currentMusicSource = 'url';
+      } else if (val === 'fileUpload') {
+        fileGroup.style.display = 'block';
+        currentMusicSource = 'file';
+      } else if (PRESET_MUSIC[val]) {
+        currentMusicSource = 'url';
+        customAudioUrl = PRESET_MUSIC[val];
+      } else {
+        currentMusicSource = 'synth';
+        customAudioUrl = '';
       }
+    }
+
+    function handleFileSelected(event) {
+      const file = event.target.files[0];
+      if (file) {
+        customAudioUrl = URL.createObjectURL(file);
+        customAudioPlayer.src = customAudioUrl;
+        currentMusicSource = 'file';
+        showToast('Local music loaded! 🎵');
+      }
+    }
+
+    // Play Selected Music (Custom Audio or Synth Fallback)
+    function playBirthdayMusic() {
+      const customUrlInput = document.getElementById('inputMusicUrl').value.trim();
+      
+      if (currentMusicSource === 'url' && customUrlInput) {
+        customAudioUrl = customUrlInput;
+      }
+
+      if ((currentMusicSource === 'url' || currentMusicSource === 'file') && customAudioUrl) {
+        customAudioPlayer.src = customAudioUrl;
+        customAudioPlayer.volume = 1.0;
+        customAudioPlayer.play().catch(() => {
+          // Fallback to synth if audio fails to load or play
+          playHappyBirthdayMelody();
+        });
+      } else {
+        playHappyBirthdayMelody();
+      }
+    }
+
+    // High Output Synthesizer (Built-in Fallback)
+    let isPlayingMelody = false;
+    function playHappyBirthdayMelody() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
       if (isPlayingMelody) return;
       
       isPlayingMelody = true;
       const tempo = 175;
       const beat = 60 / tempo;
-
-      // Pitch frequencies
       const C4 = 261.63, D4 = 293.66, E4 = 329.63, F4 = 349.23, G4 = 392.00, A4 = 440.00, Bb4 = 466.16, C5 = 523.25;
 
       const notes = [
@@ -438,10 +522,7 @@
 
       notes.forEach(([freq, beats], index) => {
         const duration = beats * beat;
-        
-        // Primary Organ/Chime Sound Wave
         const osc = audioCtx.createOscillator();
-        // Harmonics for a fuller, louder sound
         const oscSub = audioCtx.createOscillator();
         const noteGain = audioCtx.createGain();
 
@@ -449,9 +530,8 @@
         oscSub.type = 'sine';
 
         osc.frequency.setValueAtTime(freq, startTime);
-        oscSub.frequency.setValueAtTime(freq * 2, startTime); // Octave boost
+        oscSub.frequency.setValueAtTime(freq * 2, startTime);
 
-        // Increased peak volume to 0.85 (was 0.2)
         noteGain.gain.setValueAtTime(0.85, startTime);
         noteGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration - 0.02);
 
@@ -472,10 +552,9 @@
       });
     }
 
-    // 2. Loud Blowing Wind Sound (Candle Blow Out)
+    // Candle Blow Sound Effect
     function playBlowingSound() {
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      
       const bufferSize = audioCtx.sampleRate * 0.8;
       const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
       const data = buffer.getChannelData(0);
@@ -493,7 +572,7 @@
       filter.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.8);
 
       const gain = audioCtx.createGain();
-      gain.gain.setValueAtTime(0.9, audioCtx.currentTime); // Boosted from 0.3
+      gain.gain.setValueAtTime(0.9, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
 
       noise.connect(filter);
@@ -503,10 +582,9 @@
       noise.start();
     }
 
-    // 3. Loud Balloon Pop Sound Effect
+    // Balloon Pop Sound
     function playPopSound() {
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       
@@ -514,7 +592,7 @@
       osc.frequency.setValueAtTime(900, audioCtx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + 0.08);
 
-      gain.gain.setValueAtTime(0.85, audioCtx.currentTime); // Boosted from 0.3
+      gain.gain.setValueAtTime(0.85, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
 
       osc.connect(gain);
@@ -524,14 +602,16 @@
       osc.stop(audioCtx.currentTime + 0.08);
     }
 
-    // Load Recipient Name & Wish on Page Load
+    // Page Load Setup
     window.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       let nameParam = urlParams.get('name');
       let wishParam = urlParams.get('wish');
+      let musicParam = urlParams.get('music');
 
       if (!nameParam) nameParam = localStorage.getItem('saved_birthday_name');
       if (!wishParam) wishParam = localStorage.getItem('saved_birthday_wish');
+      if (!musicParam) musicParam = localStorage.getItem('saved_birthday_music');
 
       if (nameParam) {
         document.getElementById('displayName').innerText = nameParam;
@@ -543,6 +623,20 @@
         document.getElementById('inputWish').value = wishParam;
       } else {
         document.getElementById('inputWish').value = document.getElementById('displayWish').innerText;
+      }
+
+      if (musicParam) {
+        if (musicParam.startsWith('http')) {
+          currentMusicSource = 'url';
+          customAudioUrl = musicParam;
+          document.getElementById('musicSelect').value = 'customUrl';
+          document.getElementById('customUrlGroup').style.display = 'block';
+          document.getElementById('inputMusicUrl').value = musicParam;
+        } else if (PRESET_MUSIC[musicParam]) {
+          currentMusicSource = 'url';
+          customAudioUrl = PRESET_MUSIC[musicParam];
+          document.getElementById('musicSelect').value = musicParam;
+        }
       }
 
       createFloatingBalloons();
@@ -563,18 +657,28 @@
     function saveAndUpdateDetails() {
       const name = document.getElementById('inputName').value.trim() || 'Birthday Star';
       const wish = document.getElementById('inputWish').value.trim();
+      const musicSelectVal = document.getElementById('musicSelect').value;
+      const customUrlVal = document.getElementById('inputMusicUrl').value.trim();
+
+      let musicToSave = musicSelectVal;
+      if (musicSelectVal === 'customUrl' && customUrlVal) {
+        musicToSave = customUrlVal;
+      } else if (PRESET_MUSIC[musicSelectVal]) {
+        musicToSave = PRESET_MUSIC[musicSelectVal];
+      }
 
       document.getElementById('displayName').innerText = name;
       document.getElementById('displayWish').innerText = wish;
 
       localStorage.setItem('saved_birthday_name', name);
       localStorage.setItem('saved_birthday_wish', wish);
+      localStorage.setItem('saved_birthday_music', musicToSave);
 
-      const newUrl = `${window.location.pathname}?name=${encodeURIComponent(name)}&wish=${encodeURIComponent(wish)}`;
+      const newUrl = `${window.location.pathname}?name=${encodeURIComponent(name)}&wish=${encodeURIComponent(wish)}&music=${encodeURIComponent(musicToSave)}`;
       window.history.pushState({ path: newUrl }, '', newUrl);
 
       navigator.clipboard.writeText(window.location.href).then(() => {
-        showToast('Saved & copied link! 📋');
+        showToast('Saved & copied link with your music! 📋');
       }).catch(() => {
         showToast('Saved to memory! 🎉');
       });
@@ -605,12 +709,13 @@
         setTimeout(() => {
           document.getElementById('cakeEmoji').innerText = '🍰';
           document.getElementById('cakeHint').innerHTML = '✨ Make a Wish! Candles blown out! ✨';
-          playHappyBirthdayMelody();
+          playBirthdayMusic();
           triggerConfetti();
           candlesBlown = true;
         }, 300);
       } else {
         triggerConfetti();
+        playBirthdayMusic();
       }
     }
 
@@ -621,7 +726,7 @@
       giftBox.innerText = '🎁✨';
       giftMsg.style.display = 'block';
       triggerConfetti();
-      playHappyBirthdayMelody();
+      playBirthdayMusic();
     }
 
     function triggerConfetti() {
