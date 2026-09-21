@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- WhatsApp & Social Media Preview Cards (Open Graph Tags) -->
+  <meta property="og:title" content="🎁 You Have 1 Unopened Birthday Surprise!" />
+  <meta property="og:description" content="Tap to blow out your candles, pop balloons, and unlock your secret gift! 🎂✨" />
+  <meta property="og:image" content="https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&auto=format&fit=crop&q=80" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <title>Happy Birthday Celebration! 🎉</title>
+  
+  <!-- External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #ff3366;
+      --secondary: #ff9900;
+      --accent: #ffee00;
+      --bg: #0f172a;
+      --card-bg: rgba(255, 255, 255, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #31103f 100%);
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 15px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Floating Background Particles */
+    .bg-balloon {
+      position: absolute;
+      bottom: -100px;
+      font-size: 2.5rem;
+      animation: floatUp 12s linear infinite;
+      opacity: 0.6;
+      user-select: none;
+      cursor: pointer;
+      z-index: 1;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+      100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* Main Container Card */
+    .container {
+      max-width: 550px;
+      width: 100%;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 28px;
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      position: relative;
+      z-index: 10;
+      margin-bottom: 25px;
+    }
+
+    /* Creator Toggle Button */
+    .creator-toggle {
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px dashed rgba(255, 255, 255, 0.4);
+      padding: 10px 18px;
+      border-radius: 50px;
+      color: #fff;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .creator-toggle:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+
+    /* Creator Panel Drawer */
+    .creator-panel {
+      display: none;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 25px;
+      text-align: left;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border 0.3s;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #ff3366, #ff9900);
+      color: white;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 10px 20px rgba(255, 51, 102, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 25px rgba(255, 51, 102, 0.5);
+    }
+
+    .btn-whatsapp {
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+      margin-top: 10px;
+    }
+
+    /* Title & Banner Text */
+    .title-banner {
+      font-family: 'Fredoka One', cursive;
+      font-size: 2.8rem;
+      line-height: 1.2;
+      background: linear-gradient(45deg, #ffee00, #ff3366, #7000ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      animation: pulseTitle 2s infinite alternate;
+    }
+
+    @keyframes pulseTitle {
+      0% { filter: drop-shadow(0 0 10px rgba(255, 238, 0, 0.4)); }
+      100% { filter: drop-shadow(0 0 20px rgba(255, 51, 102, 0.8)); }
+    }
+
+    .recipient-name {
+      color: var(--accent);
+      text-transform: capitalize;
+    }
+
+    .wish-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+      margin: 15px 0 25px 0;
+      font-weight: 400;
+    }
+
+    /* Interactive Birthday Cake */
+    .cake-container {
+      position: relative;
+      margin: 30px auto 20px auto;
+      width: 180px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .cake-emoji {
+      font-size: 6rem;
+      display: inline-block;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .cake-container:hover .cake-emoji {
+      transform: scale(1.1) rotate(3deg);
+    }
+
+    .candle-hint {
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      background: rgba(255,255,255,0.1);
+      padding: 6px 14px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-top: 5px;
+    }
+
+    /* Gift Box Reveal */
+    .gift-section {
+      margin-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 25px;
+    }
+
+    .gift-box {
+      font-size: 4rem;
+      cursor: pointer;
+      display: inline-block;
+      animation: giftBounce 2s infinite;
+      transition: transform 0.2s;
+    }
+
+    @keyframes giftBounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0) rotate(0deg); }
+      40% { transform: translateY(-18px) rotate(-5deg); }
+      60% { transform: translateY(-10px) rotate(5deg); }
+    }
+
+    .gift-message {
+      display: none;
+      background: linear-gradient(135deg, rgba(255,238,0,0.15), rgba(255,51,102,0.15));
+      border: 1px dashed var(--accent);
+      border-radius: 16px;
+      padding: 18px;
+      margin-top: 15px;
+      color: #fff;
+      font-weight: 600;
+      animation: fadeIn 0.5s ease;
+    }
+
+    /* Action Control Bar */
+    .action-bar {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .icon-btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.1);
+    }
+
+    /* Notification Toast */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #10b981;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease;
+      z-index: 100;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating background balloons -->
+  <div id="balloon-container"></div>
+
+  <div class="container">
+    
+    <!-- Creator Drawer Toggle Button -->
+    <button class="creator-toggle" onclick="toggleCreator()">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <span>Change Name or Message</span>
+    </button>
+
+    <!-- Creator Input Panel -->
+    <div class="creator-panel" id="creatorPanel">
+      <h3 style="margin-bottom: 12px; color: var(--accent); font-size: 1.1rem;">
+        <i class="fa-solid fa-pen-to-square"></i> Set Recipient Details
+      </h3>
+      
+      <div class="form-group">
+        <label>Birthday Person's Name:</label>
+        <input type="text" id="inputName" placeholder="e.g. Alex, Sarah, Rahul" value="">
+      </div>
+
+      <div class="form-group">
+        <label>Select or Type Birthday Wish:</label>
+        <select id="wishPreset" onchange="applyPresetWish(this.value)">
+          <option value="custom">-- Choose a Wish Preset --</option>
+          <option value="Wishing you a day filled with laughter, love, joy, and endless cake! 🎂✨">Fun & Sweet Wish</option>
+          <option value="May this year bring you closer to your biggest dreams and grandest goals! 🚀🌟">Inspirational Wish</option>
+          <option value="Happy Birthday to my best friend! Grateful for another year of insane adventures with you! 🥳💖">Best Friend Wish</option>
+          <option value="Wishing you abundant health, wealth, success, and pure happiness always! 🍀🎉">Heartfelt Wish</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <textarea id="inputWish" rows="3" placeholder="Type your custom birthday wish here..."></textarea>
+      </div>
+
+      <button class="btn-action" onclick="saveAndUpdateDetails()">
+        <i class="fa-solid fa-floppy-disk"></i> Save & Copy Link
+      </button>
+
+      <button class="btn-action btn-whatsapp" onclick="shareToWhatsApp()">
+        <i class="fa-brands fa-whatsapp"></i> Send Direct via WhatsApp
+      </button>
+    </div>
+
+    <!-- Main Card Display -->
+    <h1 class="title-banner">
+      Happy Birthday, <br><span class="recipient-name" id="displayName">Birthday Star</span>! 🎉
+    </h1>
+
+    <p class="wish-text" id="displayWish">
+      Wishing you a magical year ahead filled with happiness, adventure, joy, and all your heart desires!
+    </p>
+
+    <!-- Interactive Birthday Cake -->
+    <div class="cake-container" onclick="blowOutCandles()">
+      <div class="cake-emoji" id="cakeEmoji">🎂</div>
+      <br>
+      <span class="candle-hint" id="cakeHint"><i class="fa-solid fa-wind"></i> Tap cake to blow candles!</span>
+    </div>
+
+    <!-- Controls -->
+    <div class="action-bar">
+      <button class="icon-btn" onclick="triggerConfetti()" title="Pop Confetti">🎉</button>
+      <button class="icon-btn" onclick="playPartySound()" title="Play Sound">🎵</button>
+      <button class="icon-btn" onclick="toggleCreator()" title="Create New Link">⚙️</button>
+    </div>
+
+    <!-- Interactive Gift Box -->
+    <div class="gift-section">
+      <p style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 5px;">You have an unread gift box!</p>
+      <div class="gift-box" id="giftBox" onclick="openGift()">🎁</div>
+      <div class="gift-message" id="giftMessage">
+        🎁 <strong>SPECIAL SURPRISE!</strong><br>
+        "May every moment of your special day be as wonderful and extraordinary as you are!" ✨🥂
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast">Saved! Link copied to clipboard 📋</div>
+
+  <script>
+    // Built-in Synthesizer for Audio effects (no external mp3 files required)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playTone(freq, type, duration) {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playPartySound() {
+      const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+      notes.forEach((freq, idx) => {
+        setTimeout(() => playTone(freq, 'triangle', 0.4), idx * 100);
+      });
+      triggerConfetti();
+    }
+
+    // Load Recipient Name & Wish on Page Load
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      let nameParam = urlParams.get('name');
+      let wishParam = urlParams.get('wish');
+
+      // Fallback to local storage if refreshed without URL params
+      if (!nameParam) {
+        nameParam = localStorage.getItem('saved_birthday_name');
+      }
+      if (!wishParam) {
+        wishParam = localStorage.getItem('saved_birthday_wish');
+      }
+
+      if (nameParam) {
+        document.getElementById('displayName').innerText = nameParam;
+        document.getElementById('inputName').value = nameParam;
+      }
+
+      if (wishParam) {
+        document.getElementById('displayWish').innerText = wishParam;
+        document.getElementById('inputWish').value = wishParam;
+      } else {
+        document.getElementById('inputWish').value = document.getElementById('displayWish').innerText;
+      }
+
+      createFloatingBalloons();
+      setTimeout(triggerConfetti, 800);
+    });
+
+    function toggleCreator() {
+      const panel = document.getElementById('creatorPanel');
+      panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function applyPresetWish(val) {
+      if (val !== 'custom') {
+        document.getElementById('inputWish').value = val;
+      }
+    }
+
+    // Save details to URL bar & LocalStorage so refresh remembers it
+    function saveAndUpdateDetails() {
+      const name = document.getElementById('inputName').value.trim() || 'Birthday Star';
+      const wish = document.getElementById('inputWish').value.trim();
+
+      // Update screen text
+      document.getElementById('displayName').innerText = name;
+      document.getElementById('displayWish').innerText = wish;
+
+      // 1. Save to local browser memory
+      localStorage.setItem('saved_birthday_name', name);
+      localStorage.setItem('saved_birthday_wish', wish);
+
+      // 2. Update address bar parameters
+      const newUrl = `${window.location.pathname}?name=${encodeURIComponent(name)}&wish=${encodeURIComponent(wish)}`;
+      window.history.pushState({ path: newUrl }, '', newUrl);
+
+      // 3. Copy link to clipboard
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        showToast('Saved & copied link! 📋');
+      }).catch(() => {
+        showToast('Saved to memory! 🎉');
+      });
+    }
+
+    // Share link directly on WhatsApp with Teaser Text
+    function shareToWhatsApp() {
+      saveAndUpdateDetails();
+      const name = document.getElementById('inputName').value.trim() || 'Friend';
+      const link = window.location.href;
+      
+      const message = `🤫 Shhh... ${name}, someone sent you a secret birthday surprise!\n\nTap the link below to open your gift & blow out your candles: 👇\n${link}`;
+      
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+      window.open(waUrl, '_blank');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    let candlesBlown = false;
+    function blowOutCandles() {
+      if (!candlesBlown) {
+        document.getElementById('cakeEmoji').innerText = '🍰';
+        document.getElementById('cakeHint').innerHTML = '✨ Make a Wish! Candles blown out! ✨';
+        playPartySound();
+        triggerConfetti();
+        candlesBlown = true;
+      } else {
+        triggerConfetti();
+      }
+    }
+
+    function openGift() {
+      const giftBox = document.getElementById('giftBox');
+      const giftMsg = document.getElementById('giftMessage');
+      giftBox.style.animation = 'none';
+      giftBox.innerText = '🎁✨';
+      giftMsg.style.display = 'block';
+      triggerConfetti();
+      playTone(587.33, 'sine', 0.5);
+    }
+
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    function createFloatingBalloons() {
+      const container = document.getElementById('balloon-container');
+      const balloonEmojis = ['🎈', '🎈', '✨', '🎉', '🌟', '🎈'];
+      
+      for (let i = 0; i < 12; i++) {
+        const balloon = document.createElement('div');
+        balloon.className = 'bg-balloon';
+        balloon.innerText = balloonEmojis[Math.floor(Math.random() * balloonEmojis.length)];
+        balloon.style.left = `${Math.random() * 90}%`;
+        balloon.style.animationDuration = `${8 + Math.random() * 8}s`;
+        balloon.style.animationDelay = `${Math.random() * 5}s`;
+        
+        balloon.addEventListener('click', () => {
+          playTone(800, 'square', 0.1);
+          balloon.style.display = 'none';
+        });
+
+        container.appendChild(balloon);
+      }
+    }
+  </script>
+</body>
+</html>
